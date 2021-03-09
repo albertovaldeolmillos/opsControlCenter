@@ -1,0 +1,15 @@
+﻿.hovercs {
+    cursor: pointer;
+    background-color: aquamarine;
+}
+
+.clickable {
+    cursor: pointer;
+    background: #ffff99;
+}
+
+/* columns style*/
+.empid {
+    width: 100px;
+    background-color: bisque;
+}

@@ -348,3 +348,6 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+# Archivo PrivateSettings.config (1 - incluir aqui el fichero, 2 - marcar en propiedades como 'copiar siempre', 3 - eliminar carpetas de obj y bin y recompilar)
+PrivateSettings.config

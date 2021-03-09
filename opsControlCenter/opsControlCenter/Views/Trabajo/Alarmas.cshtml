@@ -1,0 +1,131 @@
+﻿@model List<opsControlCenter.Models.Alarmas>
+@{
+    ViewBag.Title = "Alarmas";
+    ViewBag.url = "~/Trabajo/Alarmas";
+    //para que funcione con ajax es necesario indicar el parametro: ajaxUpdateContainerId
+    //para realizar además alguna acción tras la recarga ajax se usa el parametro: ajaxUpdateCallback
+    var grid = new WebGrid(canPage: true, rowsPerPage: 10, ajaxUpdateCallback: "ajaxActualizaGrid", ajaxUpdateContainerId: "grid");
+    grid.Bind(source: Model, rowCount: ViewBag.TotalRows, autoSortAndPage: false);
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="~/Content/estiloGrid.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.4.1.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+
+    <script src="~/Scripts/estiloGrid.js"></script>
+    <script src="~/Scripts/inlineGrid.js"></script>
+    <link href="~/Scripts/jquery-ui.min.css" rel="stylesheet" />
+
+    <script>
+
+        $(document).ready(function () {
+            ajaxActualizaGrid();
+        });
+        function ajaxActualizaGrid() {
+            iconosOrdenGrid();
+            esteticaGrid();
+            pieEnCabeceraGrid();
+            //tras las llamadas ajax se requiere una carga dinamica del script
+            $.getScript("../Scripts/jquery.jeditable.min.js", function () {
+                inlineEditGrid("/Trabajo/AlarmUpdateParam");
+            });
+            $.getScript("../Scripts/jquery-ui.min.js", function () {
+                $.getScript("../Scripts/jquery.jeditable.datepicker.min.js", function () {
+                    //en el caso del datepicker no funciona correctamente al paginar. 
+                    //Si lo hace si desactivamos el Ajax del grid (eliminar ajaxUpdateContainerId)
+                    //debe haber un problema entre jquery-ui y el ajax del webgrid
+                    inlineDatepickerGrid("/Trabajo/AlarmUpdateDatepickerParam", ".editable-datepicker");
+                });
+            });
+            ajaxDataSelect("/Trabajo/AlarmsDefJSON/", "/Trabajo/AlarmUpdateSelectAlarmsDefParam/", ".editable-select-alarmsDef", dataTransformAlarmsDef);
+            ajaxDataSelect("/Trabajo/UnitsJSON/", "/Trabajo/AlarmUpdateSelectUnitsParam/", ".editable-select-units", dataTransformUnits);
+        }
+        function dataTransformAlarmsDef(data, selected) {
+            var res = '';
+            for (var i = 0; i < data.length; i++) {
+                res = res + '"' + data[i].DALA_ID + '___' + data[i].DALA_DESCSHORT + '":"' + data[i].DALA_DESCSHORT + '"' + ',';
+                if (selected == data[i].DALA_DESCSHORT) selected = data[i].DALA_ID + '___' + data[i].DALA_DESCSHORT;
+            }
+            return '{' + res + '"selected": "' + selected + '"}';
+        }
+        function dataTransformUnits(data, selected) {
+            var res = '';
+            for (var i = 0; i < data.length; i++) {
+                res = res + '"' + data[i].UNI_ID + '___' + data[i].UNI_DESCSHORT + '":"' + data[i].UNI_DESCSHORT + '"' + ',';
+                if (selected == data[i].UNI_DESCSHORT) selected = data[i].UNI_ID + '___' + data[i].UNI_DESCSHORT;
+            }
+            return '{' + res + '"selected": "' + selected + '"}';
+        }
+
+    </script>
+</head>
+<body>
+
+
+    <div class="container">
+        <h3>@ViewBag.Message</h3>
+        <div id="searchBarId">
+            <form name="searchBarName" method="get" action="@Url.Content(ViewBag.url)" class="navbar-form navbar-right">
+                <div class="collapse navbar-collapse">
+                    <input type="text" name="search" value="@ViewBag.search" class="form-control" placeholder="Buscar" />
+                    <button type="submit" value="Search" class="btn btn-success">Buscar</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="grid">
+            @grid.GetHtml(
+            tableStyle: "table table-responsive table-bordered",
+            footerStyle: "table-pager",
+            firstText: "|<",
+            lastText: ">|",
+            mode: WebGridPagerModes.All,
+            columns: grid.Columns(
+                grid.Column(columnName: "Id", header: "Id", format:@<text><div>@item.Id</div></text>),
+                grid.Column(columnName: "Tipo", header: "Tipo", format:@<text><div id="divTipo_@item.Id" onclick="selectAlarmsDef($(this).text());" class="editable-select-alarmsDef" data-id="@item.Id" data-parametro="Tipo">@item.Tipo</div></text>),
+                grid.Column(columnName: "Unidad", header: "Unidad", format:@<text><div id="divUnidad_@item.Id" onclick="selectUnits($(this).text());" class="editable-select-units" data-id="@item.Id" data-parametro="Unidad">@item.Unidad</div></text>),
+                grid.Column(columnName: "Inicio", header: "Inicio", format:@<text><div id ="div_inicio_@item.Id" onclick="detalle(@item.Id,'@item.Inicio');" class="editable-datepicker" data-id="@item.Id" data-parametro="Inicio">@item.Inicio</div></text>)
+                )
+            )
+            <div class="text-right">Total reg: <span class="mark">@ViewBag.TotalRows</span></div>
+            <input type="hidden" id="idSelectedRow" value="1" />
+            @Html.Hidden("dir", grid.SortDirection)
+            @Html.Hidden("col", grid.SortColumn)
+        </div>
+        <div id="detalleAlarmas"></div>
+
+        <script>
+            var sel = '{"True":"True","False":"False", "selected":"False"}';
+
+            function detalleSeleccion(id) {
+                $("#idSelectedRow")[0].value = id;
+            }
+            function detalle(id, desc) {
+                $("#idSelectedRow")[0].value = id;
+                $("#detalleAlarmas")[0].innerHTML = id + ": " + desc;
+            }
+
+            function selectAlarmsDef(selected) {
+                if (selected.length < 30) {
+                    setTimeout(function seleccion() {
+                        $("select option:contains(" + selected + ")").attr('selected', true);
+                    }, 30);
+                }
+                $("#detalleAlarmas")[0].innerHTML = cont + ": " + selected;
+            }
+            function selectUnits(selected) {
+                if (selected.length < 30) {
+                    setTimeout(function seleccion() {
+                        $("select option:contains(" + selected + ")").attr('selected', true);
+                    }, 30);
+                }
+                $("#detalleAlarmas")[0].innerHTML = cont + ": " + selected;
+            }
+        </script>
+    </div>
+</body>
+</html>
