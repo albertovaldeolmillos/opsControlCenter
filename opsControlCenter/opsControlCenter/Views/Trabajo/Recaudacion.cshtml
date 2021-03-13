@@ -1,7 +1,7 @@
-﻿@model List<opsControlCenter.Models.Alarmas>
+﻿@model List<opsControlCenter.Models.Recaudacion>
 @{
-    ViewBag.Title = "Alarmas";
-    ViewBag.url = "~/Trabajo/Alarmas";
+    ViewBag.Title = "Recaudacion";
+    ViewBag.url = "~/Trabajo/Recaudacion";
     //para que funcione con ajax es necesario indicar el parametro: ajaxUpdateContainerId
     //para realizar además alguna acción tras la recarga ajax se usa el parametro: ajaxUpdateCallback
     var grid = new WebGrid(canPage: true, rowsPerPage: 10, ajaxUpdateCallback: "ajaxActualizaGrid", ajaxUpdateContainerId: "grid");
@@ -28,29 +28,12 @@
             iconosOrdenGrid();
             esteticaGrid();
             pieEnCabeceraGrid();
+
             //tras las llamadas ajax se requiere una carga dinamica del script
             $.getScript("../Scripts/jquery.jeditable.min.js", function () {
-                inlineEditGrid("/Trabajo/AlarmUpdateParam");
-                ajaxDataSelect("/Trabajo/AlarmsDefJSON/", "/Trabajo/AlarmUpdateSelectParam/", ".editable-select-alarmsDef", dataTransformAlarmsDef);
-                ajaxDataSelect("/Trabajo/UnitsJSON/", "/Trabajo/AlarmUpdateSelectParam/", ".editable-select-units", dataTransformUnits);
+                ajaxDataSelect("/Trabajo/UnitsJSON/", "/Trabajo/RecaudacionUpdateSelectParam/", ".editable-select-units", dataTransformUnits);
             });
-            $.getScript("../Scripts/jquery-ui.min.js", function () {
-                $.getScript("../Scripts/jquery.jeditable.datepicker.min.js", function () {
-                    //en el caso del datepicker no funciona correctamente al paginar. 
-                    //Si lo hace si desactivamos el Ajax del grid (eliminar ajaxUpdateContainerId)
-                    //debe haber un problema entre jquery-ui y el ajax del webgrid
-                    inlineDatepickerGrid("/Trabajo/AlarmUpdateDatepickerParam", ".editable-datepicker");
-                });
-            });
-
-        }
-        function dataTransformAlarmsDef(data, selected) {
-            var res = '';
-            for (var i = 0; i < data.length; i++) {
-                res = res + '"' + data[i].DALA_ID + '___' + data[i].DALA_DESCSHORT + '":"' + data[i].DALA_DESCSHORT + '"' + ',';
-                if (selected == data[i].DALA_DESCSHORT) selected = data[i].DALA_ID + '___' + data[i].DALA_DESCSHORT;
-            }
-            return '{' + res + '"selected": "' + selected + '"}';
+            
         }
         function dataTransformUnits(data, selected) {
             var res = '';
@@ -85,10 +68,14 @@
             lastText: ">|",
             mode: WebGridPagerModes.All,
             columns: grid.Columns(
-                grid.Column(columnName: "ALA_ID", header: "Id", format:@<text><div>@item.ALA_ID</div></text>),
-                grid.Column(columnName: "Tipo", header: "Tipo", format:@<text><div id="divTipo_@item.ALA_ID" onclick="selectAlarmsDef($(this).text());" class="editable-select-alarmsDef" data-id="@item.ALA_ID" data-parametro="Tipo">@item.Tipo</div></text>),
-                grid.Column(columnName: "Unidad", header: "Unidad", format:@<text><div id="divUnidad_@item.ALA_ID" onclick="selectUnits($(this).text());" class="editable-select-units" data-id="@item.ALA_ID" data-parametro="Unidad">@item.Unidad</div></text>),
-                grid.Column(columnName: "ALA_INIDATE", header: "Inicio", format:@<text><div id ="div_inicio_@item.ALA_ID" onclick="detalle(@item.ALA_ID,'@item.ALA_INIDATE');" class="editable-datepicker" data-id="@item.ALA_ID" data-parametro="Inicio">@item.ALA_INIDATE</div></text>)
+                grid.Column(columnName: "COL_ID", header: "Id", format:@<text><div>@item.COL_ID</div></text>),
+                grid.Column(columnName: "COL_UNI_ID", header: "Unidad", format:@<text><div id="divUnidad_@item.COL_ID" onclick="selectUnits($(this).text());" class="editable-select-units" data-id="@item.COL_ID" data-parametro="COL_UNI_ID">@item.COL_UNI_ID</div></text>),
+                grid.Column(columnName: "COL_NUM", header: "Número", format:@<text><div>@item.COL_NUM</div></text>),
+                grid.Column(columnName: "COL_DATE", header: "Fecha", format:@<text><div>@item.COL_DATE</div></text>),
+                grid.Column(columnName: "COL_INIDATE", header: "Inicio", format:@<text><div>@item.COL_INIDATE</div></text>),
+                grid.Column(columnName: "COL_ENDDATE", header: "Fin", format:@<text><div>@item.COL_ENDDATE</div></text>),
+                grid.Column(columnName: "COL_BACK_COL_TOTAL", header: "Total", format:@<text><div>@item.COL_BACK_COL_TOTAL</div></text>),
+                grid.Column(columnName: "COL_COIN_SYMBOL", header: "Moneda", format:@<text><div>@item.COL_COIN_SYMBOL</div></text>)
                 )
             )
             <div class="text-right">Total reg: <span class="mark">@ViewBag.TotalRows</span></div>
@@ -96,26 +83,8 @@
             @Html.Hidden("dir", grid.SortDirection)
             @Html.Hidden("col", grid.SortColumn)
         </div>
-        <div id="detalleAlarmas"></div>
 
         <script>
-            var sel = '{"True":"True","False":"False", "selected":"False"}';
-
-            function detalleSeleccion(id) {
-                $("#idSelectedRow")[0].value = id;
-            }
-            function detalle(id, desc) {
-                $("#idSelectedRow")[0].value = id;
-                $("#detalleAlarmas")[0].innerHTML = id + ": " + desc;
-            }
-
-            function selectAlarmsDef(selected) {
-                if (selected.length < 30) {
-                    setTimeout(function seleccion() {
-                        $("select option:contains(" + selected + ")").attr('selected', true);
-                    }, 30);
-                }
-            }
             function selectUnits(selected) {
                 if (selected.length < 30) {
                     setTimeout(function seleccion() {

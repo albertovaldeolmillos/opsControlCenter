@@ -175,6 +175,7 @@
     <Compile Include="Models\ALARMS.cs" />
     <Compile Include="Models\ALARMS_DEF.cs" />
     <Compile Include="Models\COLLECTINGS.cs" />
+    <Compile Include="Models\Recaudacion.cs" />
     <Compile Include="Models\UNITS.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -246,9 +247,11 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Trabajo\Alarmas.cshtml" />
+    <Content Include="Views\Trabajo\Recaudacion.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Views\Login\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />

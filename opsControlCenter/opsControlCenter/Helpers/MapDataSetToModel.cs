@@ -12,10 +12,16 @@ namespace opsControlCenter.Helpers
     public class MapDataSetToModel
     {
         string strMunicipio = ConfigurationManager.AppSettings["OPSMunicipio"];
+
+        #region Alarmas
+
         public List<Alarmas> MapAlarms()
         {
             string strModel = "Alarmas";
-            string strSQL = "select ala_id as Id, dala_id as idTipo, dala_descshort as Tipo, ala_uni_id as Unidad, ala_inidate as Inicio from " + strMunicipio + ".alarms inner join " + strMunicipio + ".alarms_def on alarms.ala_dala_id = alarms_def.dala_id";
+            string strSQL = "select ala_id, ala_dala_id, dala_descshort as Tipo, ala_uni_id, uni_descshort as Unidad, ala_inidate " +
+                "from " + strMunicipio + ".alarms " +
+                "inner join " + strMunicipio + ".alarms_def on alarms.ala_dala_id = alarms_def.dala_id " +
+                "inner join " + strMunicipio + ".units on alarms.ala_uni_id = units.uni_id";
 
             List<Alarmas> data = new List<Alarmas>();
             DataSetObject dataSetObject = new DataSetObject();
@@ -37,6 +43,40 @@ namespace opsControlCenter.Helpers
             }
             return data;
         }
+
+        #endregion
+
+        #region Recaudacion
+
+        public List<Recaudacion> MapRecaudacion()
+        {
+            string strModel = "Recaudacion";
+            string strSQL = "select COL_ID, COL_UNI_ID, COL_NUM, COL_DATE, COL_INIDATE, COL_ENDDATE, COL_BACK_COL_TOTAL, COL_COIN_SYMBOL from " + strMunicipio + ".collectings";
+
+            List<Recaudacion> data = new List<Recaudacion>();
+            DataSetObject dataSetObject = new DataSetObject();
+            DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
+            if (ds.Tables[strModel].Rows.Count > 0)
+            {
+                ConfigMapModel configMapModel = new ConfigMapModel();
+                var config = configMapModel.configRecaudacion();
+
+                IMapper iMapper = config.CreateMapper();
+
+                int cont = 0;
+                foreach (DataRow row in ds.Tables[strModel].Rows)
+                {
+                    Recaudacion elem = iMapper.Map<DataRow, Recaudacion>(ds.Tables[strModel].Rows[cont]);
+                    data.Add(elem);
+                    cont++;
+                }
+            }
+            return data;
+        }
+
+        #endregion
+
+        #region Comun
 
         public List<ALARMS_DEF> MapAlarmsDef()
         {
@@ -109,5 +149,8 @@ namespace opsControlCenter.Helpers
             }
             return data;
         }
+
+        #endregion
+
     }
 }

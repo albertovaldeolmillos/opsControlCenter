@@ -5,11 +5,12 @@ namespace opsControlCenter.Models
     
     public partial class Alarmas
     {
-        public decimal Id { get; set; }
-        public decimal IdTipo { get; set; }
+        public decimal ALA_ID { get; set; }
+        public decimal ALA_DALA_ID { get; set; }
         public string Tipo { get; set; }
-        public decimal Unidad { get; set; }
-        public System.DateTime Inicio { get; set; }
+        public decimal ALA_UNI_ID { get; set; }
+        public string Unidad { get; set; }
+        public System.DateTime ALA_INIDATE { get; set; }
 
     }
 }
