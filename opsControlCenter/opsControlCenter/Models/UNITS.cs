@@ -14,12 +14,12 @@ namespace opsControlCenter.Models
     
     public partial class UNITS
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public UNITS()
-        {
-            this.ALARMS = new HashSet<ALARMS>();
-            this.COLLECTINGS = new HashSet<COLLECTINGS>();
-        }
+        //[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        //public UNITS()
+        //{
+        //    this.ALARMS = new HashSet<ALARMS>();
+        //    this.COLLECTINGS = new HashSet<COLLECTINGS>();
+        //}
     
         public decimal UNI_ID { get; set; }
         public decimal UNI_DPUNI_ID { get; set; }
@@ -41,9 +41,9 @@ namespace opsControlCenter.Models
         public Nullable<decimal> UNI_MAIL_SENT { get; set; }
         public Nullable<decimal> UNI_USR_ID { get; set; }
     
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<ALARMS> ALARMS { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<COLLECTINGS> COLLECTINGS { get; set; }
+        //[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        //public virtual ICollection<ALARMS> ALARMS { get; set; }
+        //[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        //public virtual ICollection<COLLECTINGS> COLLECTINGS { get; set; }
     }
 }

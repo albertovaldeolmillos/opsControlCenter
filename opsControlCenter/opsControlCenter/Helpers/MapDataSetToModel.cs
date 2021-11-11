@@ -12,36 +12,39 @@ namespace opsControlCenter.Helpers
     public class MapDataSetToModel
     {
         string strMunicipio = ConfigurationManager.AppSettings["OPSMunicipio"];
+        ConfigMapModel configMapModel = new ConfigMapModel();
 
         #region Alarmas
 
-        public List<Alarmas> MapAlarms()
+        public List<Alarmas> MapAlarmas()
         {
-            string strModel = "Alarmas";
-            string strSQL = "select ala_id, ala_dala_id, dala_descshort as Tipo, ala_uni_id, uni_descshort as Unidad, ala_inidate " +
-                "from " + strMunicipio + ".alarms " +
-                "inner join " + strMunicipio + ".alarms_def on alarms.ala_dala_id = alarms_def.dala_id " +
-                "inner join " + strMunicipio + ".units on alarms.ala_uni_id = units.uni_id";
-
-            List<Alarmas> data = new List<Alarmas>();
-            DataSetObject dataSetObject = new DataSetObject();
-            DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-            if (ds.Tables[strModel].Rows.Count > 0)
+            using (DataSetObject dataSetObject = new DataSetObject())
             {
-                ConfigMapModel configMapModel = new ConfigMapModel();
-                var config = configMapModel.configAlarmas();
+                string strModel = "Alarmas";
+                string strSQL = "select ala_id, ala_dala_id, dala_descshort, ala_uni_id, uni_descshort, ala_inidate " +
+                    "from " + strMunicipio + ".alarms " +
+                    "inner join " + strMunicipio + ".alarms_def on alarms.ala_dala_id = alarms_def.dala_id " +
+                    "inner join " + strMunicipio + ".units on alarms.ala_uni_id = units.uni_id";
 
-                IMapper iMapper = config.CreateMapper();
-
-                int cont = 0;
-                foreach (DataRow row in ds.Tables[strModel].Rows)
+                List<Alarmas> data = new List<Alarmas>();              
+                DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
+                if (ds.Tables[strModel].Rows.Count > 0)
                 {
-                    Alarmas elem = iMapper.Map<DataRow, Alarmas>(ds.Tables[strModel].Rows[cont]);
-                    data.Add(elem);
-                    cont++;
+                    var config = configMapModel.configAlarmas();
+
+                    IMapper iMapper = config.CreateMapper();
+
+                    int cont = 0;
+                    foreach (DataRow row in ds.Tables[strModel].Rows)
+                    {
+                        Alarmas elem = iMapper.Map<DataRow, Alarmas>(ds.Tables[strModel].Rows[cont]);
+                        data.Add(elem);
+                        cont++;
+                    }
                 }
+                return data;
             }
-            return data;
+
         }
 
         #endregion
@@ -50,28 +53,31 @@ namespace opsControlCenter.Helpers
 
         public List<Recaudacion> MapRecaudacion()
         {
-            string strModel = "Recaudacion";
-            string strSQL = "select COL_ID, COL_UNI_ID, COL_NUM, COL_DATE, COL_INIDATE, COL_ENDDATE, COL_BACK_COL_TOTAL, COL_COIN_SYMBOL from " + strMunicipio + ".collectings";
-
-            List<Recaudacion> data = new List<Recaudacion>();
-            DataSetObject dataSetObject = new DataSetObject();
-            DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-            if (ds.Tables[strModel].Rows.Count > 0)
+            using (DataSetObject dataSetObject = new DataSetObject())
             {
-                ConfigMapModel configMapModel = new ConfigMapModel();
-                var config = configMapModel.configRecaudacion();
+                string strModel = "Recaudacion";
+                string strSQL = "select COL_ID, COL_UNI_ID, UNI_DESCSHORT, COL_NUM, COL_DATE, COL_INIDATE, COL_ENDDATE, COL_BACK_COL_TOTAL, COL_COIN_SYMBOL " +
+                    "from " + strMunicipio + ".collectings " +
+                    "inner join " + strMunicipio + ".units on collectings.col_uni_id = units.uni_id";
 
-                IMapper iMapper = config.CreateMapper();
-
-                int cont = 0;
-                foreach (DataRow row in ds.Tables[strModel].Rows)
+                List<Recaudacion> data = new List<Recaudacion>();
+                DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
+                if (ds.Tables[strModel].Rows.Count > 0)
                 {
-                    Recaudacion elem = iMapper.Map<DataRow, Recaudacion>(ds.Tables[strModel].Rows[cont]);
-                    data.Add(elem);
-                    cont++;
+                    var config = configMapModel.configRecaudacion();
+
+                    IMapper iMapper = config.CreateMapper();
+
+                    int cont = 0;
+                    foreach (DataRow row in ds.Tables[strModel].Rows)
+                    {
+                        Recaudacion elem = iMapper.Map<DataRow, Recaudacion>(ds.Tables[strModel].Rows[cont]);
+                        data.Add(elem);
+                        cont++;
+                    }
                 }
+                return data;
             }
-            return data;
         }
 
         #endregion
@@ -80,74 +86,134 @@ namespace opsControlCenter.Helpers
 
         public List<ALARMS_DEF> MapAlarmsDef()
         {
-            string strModel = "ALARMS_DEF";
-            string strSQL = "select * from " + strMunicipio + ".ALARMS_DEF";
-
-            List<ALARMS_DEF> data = new List<ALARMS_DEF>();
-            DataSetObject dataSetObject = new DataSetObject();
-            DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-            if (ds.Tables[strModel].Rows.Count > 0)
+            using (DataSetObject dataSetObject = new DataSetObject())
             {
-                ConfigMapModel configMapModel = new ConfigMapModel();
-                var config = configMapModel.configAlarmsDef();
+                string strModel = "ALARMS_DEF";
+                string strSQL = "select * from " + strMunicipio + ".ALARMS_DEF";
 
-                IMapper iMapper = config.CreateMapper();
-
-                int cont = 0;
-                foreach (DataRow row in ds.Tables[strModel].Rows)
+                List<ALARMS_DEF> data = new List<ALARMS_DEF>();
+                DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
+                if (ds.Tables[strModel].Rows.Count > 0)
                 {
-                    ALARMS_DEF elem = iMapper.Map<DataRow, ALARMS_DEF>(ds.Tables[strModel].Rows[cont]);
-                    data.Add(elem);
-                    cont++;
+                    var config = configMapModel.configAlarmsDef();
+
+                    IMapper iMapper = config.CreateMapper();
+
+                    int cont = 0;
+                    foreach (DataRow row in ds.Tables[strModel].Rows)
+                    {
+                        ALARMS_DEF elem = iMapper.Map<DataRow, ALARMS_DEF>(ds.Tables[strModel].Rows[cont]);
+                        data.Add(elem);
+                        cont++;
+                    }
                 }
+                return data;
             }
-            return data;
         }
 
         public ALARMS_DEF MapAlarmsDef(int id)
         {
-            string strModel = "ALARMS_DEF";
-            string strSQL = "SELECT * FROM ALARMS_DEF WHERE DALA_ID=" + id;
-
-            ALARMS_DEF data = new ALARMS_DEF();
-            DataSetObject dataSetObject = new DataSetObject();
-            DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-            if (ds.Tables[strModel].Rows.Count > 0)
+            using (DataSetObject dataSetObject = new DataSetObject())
             {
-                ConfigMapModel configMapModel = new ConfigMapModel();
-                var config = configMapModel.configAlarmsDef();
+                string strModel = "ALARMS_DEF";
+                string strSQL = "SELECT * FROM " + strMunicipio + ".ALARMS_DEF WHERE DALA_ID=" + id;
 
-                IMapper iMapper = config.CreateMapper();
+                ALARMS_DEF data = new ALARMS_DEF();
+                DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
+                if (ds.Tables[strModel].Rows.Count > 0)
+                {
+                    var config = configMapModel.configAlarmsDef();
 
-                data = iMapper.Map<DataRow, ALARMS_DEF>(ds.Tables[strModel].Rows[0]);
+                    IMapper iMapper = config.CreateMapper();
+
+                    data = iMapper.Map<DataRow, ALARMS_DEF>(ds.Tables[strModel].Rows[0]);
+                }
+                return data;
             }
-            return data;
         }
 
         public List<UNITS> MapUnits()
         {
-            string strModel = "UNITS";
-            string strSQL = "select * from " + strMunicipio + ".UNITS";
-
-            List<UNITS> data = new List<UNITS>();
-            DataSetObject dataSetObject = new DataSetObject();
-            DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-            if (ds.Tables[strModel].Rows.Count > 0)
+            using (DataSetObject dataSetObject = new DataSetObject())
             {
-                ConfigMapModel configMapModel = new ConfigMapModel();
-                var config = configMapModel.configUnits();
+                string strModel = "UNITS";
+                string strSQL = "select * from " + strMunicipio + ".UNITS";
 
-                IMapper iMapper = config.CreateMapper();
-
-                int cont = 0;
-                foreach (DataRow row in ds.Tables[strModel].Rows)
+                List<UNITS> data = new List<UNITS>();
+                DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
+                if (ds.Tables[strModel].Rows.Count > 0)
                 {
-                    UNITS elem = iMapper.Map<DataRow, UNITS>(ds.Tables[strModel].Rows[cont]);
-                    data.Add(elem);
-                    cont++;
+                    var config = configMapModel.configUnits();
+
+                    IMapper iMapper = config.CreateMapper();
+
+                    int cont = 0;
+                    foreach (DataRow row in ds.Tables[strModel].Rows)
+                    {
+                        UNITS elem = iMapper.Map<DataRow, UNITS>(ds.Tables[strModel].Rows[cont]);
+                        data.Add(elem);
+                        cont++;
+                    }
                 }
+                return data;
             }
-            return data;
+        }
+
+        #endregion
+
+        #region Usuarios roles
+
+        public Usuario MapUsuarioByLoginName(string USR_LOGIN)
+        {
+            using (DataSetObject dataSetObject = new DataSetObject())
+            {
+                string strModel = "Usuario";
+                string strSQL = "SELECT * FROM " + strMunicipio + ".USERS INNER JOIN " + strMunicipio + ".ROLES ON USERS.USR_ROL_ID = ROLES.ROL_ID WHERE USR_LOGIN='" + USR_LOGIN + "'";
+
+                Usuario data = new Usuario();
+                DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
+                if (ds.Tables[strModel].Rows.Count > 0)
+                {
+                    var config = configMapModel.configUsuario();
+
+                    IMapper iMapper = config.CreateMapper();
+
+                    data = iMapper.Map<DataRow, Usuario>(ds.Tables[strModel].Rows[0]);
+                }
+                return data;
+            }
+        }
+
+        public string[] GetRolesUsuario (string USR_LOGIN)
+        {
+            Usuario user = MapUsuarioByLoginName(USR_LOGIN);
+            string[] roles = new string[] { };
+
+            switch (user.USR_ROL_ID)
+            {
+                case 0:
+                    roles = new string[] { "admin" };
+                    break;
+                case 1:
+                    roles = new string[] { "admin" };
+                    break;
+                case 2:
+                    roles = new string[] { "mant" };
+                    break;
+                case 3:
+                    roles = new string[] { "vigi" };
+                    break;
+                case 6:
+                    roles = new string[] { "user" };
+                    break;
+                default:
+                    roles = new string[] { "user" };
+                    break;
+
+            }
+
+            //roles = new string[] { user.ROL_DESCSHORT };
+            return roles;
         }
 
         #endregion

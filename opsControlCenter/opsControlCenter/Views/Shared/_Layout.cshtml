@@ -1,40 +1,92 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <title>@ViewBag.Title</title>
+    <link href="~/Content/estiloGrid.css" rel="stylesheet" />
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
 </head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
+        <div class="container-fluid">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                @Html.ActionLink("Nombre de la aplicación", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+                
             </div>
             <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("Inicio", "Index", "Home", new { area = "" }, null)</li>
-                    <li>@Html.ActionLink("API", "Index", "Help", new { area = "" }, null)</li>
-                    <li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                            Trabajo<span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li class="dropdown-item">@Html.ActionLink("Alarmas", "Alarmas", "Trabajo", new { area = "" }, null)</li>
-                            <li class="dropdown-item">@Html.ActionLink("Recaudación", "Recaudacion", "Trabajo", new { area = "" }, null)</li>
-                            <li class="dropdown-item">@Html.ActionLink("API", "Index", "Help", new { area = "" }, null)</li>
-                        </ul>
-                    </li>
-                </ul>
+                <a href="/Home/Index"><img class="img-fluid rounded d-block m-l-none" alt="OPS Control Center" src="~/Content/Images/group.png"></a>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <ul class="nav navbar-nav">
+                        <li><a href="@Url.Action("Index", "Home")"><span class="glyphicon glyphicon-home" aria-hidden="true"></span>  Inicio</a></li>
+                        <li>@Html.ActionLink("API", "Index", "Help", new { area = "" }, null)</li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>  Trabajo<span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                @if (User.IsInRole("admin") || User.IsInRole("vigi"))
+                                {
+                                    <li class="dropdown-item"><a href="@Url.Action("Alarmas", "Trabajo")"><span class="glyphicon glyphicon-alert" aria-hidden="true"></span>  Alarmas</a></li>
+                                }
+                                <li class="dropdown-item"><a href="@Url.Action("Recaudacion", "Trabajo")"><span class="glyphicon glyphicon-piggy-bank" aria-hidden="true"></span>  Recaudación</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon" aria-hidden="true"></span>  Pago telefónico<span class="caret"></span></a>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon" aria-hidden="true"></span>  Máquinas<span class="caret"></span></a>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon" aria-hidden="true"></span>  Calendario<span class="caret"></span></a>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon" aria-hidden="true"></span>  Artículos<span class="caret"></span></a>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon" aria-hidden="true"></span>  Comunicaciones<span class="caret"></span></a>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon" aria-hidden="true"></span>  Históricos<span class="caret"></span></a>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon" aria-hidden="true"></span>  Estadísticas<span class="caret"></span></a>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon" aria-hidden="true"></span>  Sanciones<span class="caret"></span></a>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon" aria-hidden="true"></span>  Seguridad<span class="caret"></span></a>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon" aria-hidden="true"></span>  Configuración<span class="caret"></span></a>
+                        </li>
+
+                        <!--<li class="navbar-brand">Bienvenido: @ViewData["USR_LOGIN"]</li>-->
+
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="#"><span class="glyphicon glyphicon-user"></span> @ViewData["USR_LOGIN"]</a></li>
+                        <li><a href="/Login/Logout"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+                    </ul>
+
+
+
+                }
+                else
+                {
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="/Login/Login"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+                    </ul>
+                }
+
             </div>
         </div>
     </div>
@@ -42,8 +94,16 @@
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; Gertek @DateTime.Now.Year - OPS Control Center</p>
+            <p></p>
         </footer>
+    </div>
+    <div class="navbar navbar-inverse navbar-fixed-bottom">
+        <div class="container-fluid">
+            <div class="text-warning">&copy; Gertek @DateTime.Now.Year - OPS Control Center</div>
+        </div>
+    </div>
+    <div class="logo">
+        <img src="../../Content/Images/logoOPS_4.png" />
     </div>
 
     @Scripts.Render("~/bundles/jquery")

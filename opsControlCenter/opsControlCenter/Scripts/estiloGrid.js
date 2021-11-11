@@ -34,10 +34,15 @@ function esteticaGrid() {
             }
         })
         .wrap('<span class="btn btn-primary" />');
-    $('tbody tr').hover(function () {
-        $(this).toggleClass('hovercs');  //hover change highlight style
-    }).on('click', function () {
-        $('tbody tr').not($(this)).removeClass('clickable');  //remove other row click highlight style
-        $(this).addClass('clickable');  // add style to current row
-    });
+    //$('tbody tr').hover(function () {
+    //    $(this).toggleClass('hovercs');  //hover change highlight style
+    //}).on('click', function () {
+    //    $('tbody tr').not($(this)).removeClass('clickable');  //remove other row click highlight style
+    //    $('tbody tr').not($(this)).removeClass('hovercs');
+    //    $(this).addClass('clickable');  // add style to current row
+    //});
+}
+//al paginar se queda cacheado y hace que no funcione correctamente, por eso se elimina.
+function eliminaDivDatapicker() {
+    $("#ui-datepicker-div").remove();
 }

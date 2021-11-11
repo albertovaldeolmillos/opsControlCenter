@@ -1,0 +1,48 @@
+﻿@model List<opsControlCenter.Models.Recaudacion>
+
+    <style>
+        thead {
+            background-color: black;
+            color: white
+        }
+
+        table {
+            border: 1px solid black;
+        }
+
+        td, th {
+            padding: 5px;
+            font-size: 14px;
+        }
+    </style>
+
+    <table class="table table-bordered table-striped" border="1" style="border-color:black">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Unidad</th>
+                <th>Número</th>
+                <th>Fecha</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Total</th>
+                <th>Moneda</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+            <tr>
+                <td>@item.COL_ID</td>
+                <td>@item.UNI_DESCSHORT</td>
+                <td>@item.COL_NUM</td>
+                <td>@item.COL_DATE</td>
+                <td>@item.COL_INIDATE</td>
+                <td>@item.COL_ENDDATE</td>
+                <td>@item.COL_BACK_COL_TOTAL</td>
+                <td>@item.COL_COIN_SYMBOL</td>
+            </tr>
+
+            }
+        </tbody>
+    </table>

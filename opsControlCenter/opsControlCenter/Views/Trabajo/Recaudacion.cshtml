@@ -4,95 +4,119 @@
     ViewBag.url = "~/Trabajo/Recaudacion";
     //para que funcione con ajax es necesario indicar el parametro: ajaxUpdateContainerId
     //para realizar además alguna acción tras la recarga ajax se usa el parametro: ajaxUpdateCallback
-    var grid = new WebGrid(canPage: true, rowsPerPage: 10, ajaxUpdateCallback: "ajaxActualizaGrid", ajaxUpdateContainerId: "grid");
+    var grid = new WebGrid(canPage: true, rowsPerPage: ViewBag.PageSize, ajaxUpdateCallback: "ajaxActualizaGrid", ajaxUpdateContainerId: "grid");
     grid.Bind(source: Model, rowCount: ViewBag.TotalRows, autoSortAndPage: false);
 }
 
-<!DOCTYPE html>
-<html>
-<head>
-    <link href="~/Content/estiloGrid.css" rel="stylesheet" />
-    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
-    <script src="~/Scripts/jquery-3.4.1.min.js"></script>
 
-    <script src="~/Scripts/estiloGrid.js"></script>
-    <script src="~/Scripts/inlineGrid.js"></script>
-    <link href="~/Scripts/jquery-ui.min.css" rel="stylesheet" />
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+
+<script src="~/Scripts/estiloGrid.js"></script>
+<script src="~/Scripts/inlineGrid.js"></script>
+<link href="~/Scripts/jquery-ui.min.css" rel="stylesheet" />
+
+<script>
+
+    $(document).ready(function () {
+        ajaxActualizaGrid();
+    });
+    function ajaxActualizaGrid() {
+        iconosOrdenGrid();
+        esteticaGrid();
+        pieEnCabeceraGrid();
+
+        //tras las llamadas ajax se requiere una carga dinamica del script
+        $.getScript("../Scripts/jquery.jeditable.min.js", function () {
+            inlineEditGrid("/Trabajo/RecaudacionUpdateParam");
+            ajaxDataSelect("/Trabajo/UnitsJSON/", "/Trabajo/RecaudacionUpdateSelectParam/", ".editable-select-units", dataTransformUnits);
+        });
+        
+    }
+    function dataTransformUnits(data, selected) {
+        var res = '';
+        for (var i = 0; i < data.length; i++) {
+            res = res + '"' + data[i].UNI_ID + '___' + data[i].UNI_DESCSHORT + '":"' + data[i].UNI_DESCSHORT + '"' + ',';
+            if (selected == data[i].UNI_DESCSHORT) selected = data[i].UNI_ID + '___' + data[i].UNI_DESCSHORT;
+        }
+        return '{' + res + '"selected": "' + selected + '"}';
+    }
+    function filtrar() { ajaxFilter('/Trabajo/RecaudacionFilter', '/Trabajo/Recaudacion', $('#searchBarId form').serialize()); }
+    function limpiar() { $('#searchBarId form').find('input:text, input:password, input:file, select, textarea').val(''); }
+    function pdf() { this.location.href = "/Trabajo/RecaudacionPDF?sort=" + $('#col').val() + "&sortdir=" + $('#dir').val() }
+    function excel() { this.location.href = "/Trabajo/RecaudacionXLS?sort=" + $('#col').val() + "&sortdir=" + $('#dir').val() }
+
+</script>
+
+<div class="container">
+    <h3>@ViewBag.Message</h3>
+    <div id="searchBarId">
+        <form name="searchBarName" method="post" class="navbar-form navbar-right">
+            <div class="form-inline row">
+                <div class="col-sm-11">
+                    @foreach (var elem in typeof(opsControlCenter.Models.Recaudacion).GetProperties())
+                    {
+                        var attribute = elem.GetCustomAttributes(typeof(System.ComponentModel.DisplayNameAttribute), true).Cast<System.ComponentModel.DisplayNameAttribute>().SingleOrDefault();
+                        string NombreAtributo = (attribute == null) ? elem.Name : attribute.DisplayName;
+                        if (ViewBag.search != null)
+                        {
+                            <input type="text" name="search_@elem.Name" value="@ViewBag.search["search_"+elem.Name]" class="form-control" placeholder="Buscar @NombreAtributo" />
+                        }
+                        else
+                        {
+                            <input type="text" name="search_@elem.Name" value="" class="form-control" placeholder="Buscar @NombreAtributo" />
+                        }
+                    }
+                </div>
+                <div class="col-sm-1">
+                    <button type="button" value="Search" style="padding:6px;" class="btn btn-primary glyphicon glyphicon-search" onclick="filtrar();"></button>
+                    <button type="button" value="Reset" style="padding:6px;" class="btn btn-primary glyphicon glyphicon-repeat" onclick="limpiar(); filtrar();"></button>
+                    
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="grid">
+        @grid.GetHtml(
+        tableStyle: "table table-striped table-responsive table-bordered",
+        footerStyle: "table-pager",
+        firstText: "|<",
+        lastText: ">|",
+        mode: WebGridPagerModes.All,
+        columns: grid.Columns(
+            grid.Column(columnName: "COL_ID", header: "Id", format:@<text><div>@item.COL_ID</div></text>),
+            grid.Column(columnName: "UNI_DESCSHORT", header: "Unidad", style: "selectCol", format:@<text><div id="divUnidad_@item.COL_ID" onclick="selectUnits($(this).text());" class="editable-select-units" data-id="@item.COL_ID" data-parametro="COL_UNI_ID" data-original="@item.COL_UNI_ID">@item.UNI_DESCSHORT</div></text>),
+            grid.Column(columnName: "COL_NUM", header: "Número", style: "textCol", format:@<text><div id="divNumero_@item.COL_ID" class="editable-text" data-id="@item.COL_ID" data-parametro="COL_NUM" data-original="@item.COL_NUM">@item.COL_NUM</div></text>),
+            //grid.Column(columnName: "COL_DATE", header: "Fecha", format:@<text><input id ="inputFecha_@item.COL_ID" value="@item.COL_DATE.ToString("yyyy-MM-ddTHH:mm:ss")" type="datetime-local" /></text>),
+            grid.Column(columnName: "COL_DATE", header: "Fecha", format:@<text><div>@item.COL_DATE</div></text>),
+            grid.Column(columnName: "COL_INIDATE", header: "Inicio", format:@<text><div>@item.COL_INIDATE</div></text>),
+            grid.Column(columnName: "COL_ENDDATE", header: "Fin", format:@<text><div>@item.COL_ENDDATE</div></text>),
+            grid.Column(columnName: "COL_BACK_COL_TOTAL", header: "Total", format:@<text><div>@item.COL_BACK_COL_TOTAL</div></text>),
+            grid.Column(columnName: "COL_COIN_SYMBOL", header: "Moneda", style: "textCol", format:@<text><div id="divMoneda_@item.COL_ID" class="editable-text" data-id="@item.COL_ID" data-parametro="COL_COIN_SYMBOL" data-original="@item.COL_COIN_SYMBOL">@item.COL_COIN_SYMBOL</div></text>)
+            )
+        )
+        @{ 
+            var sortDirection = "ASC"; if (grid.SortDirection == SortDirection.Descending) { sortDirection = "DESC"; };
+            var sortColumn = "COL_ID"; if (grid.SortColumn != "undefined" && grid.SortColumn != "") { sortColumn = grid.SortColumn; };
+        }
+        <div class="text-right">
+            <button type="button" value="XLS" style="padding:6px;" class="btn btn-primary" onclick="excel();">XLS</button>
+            <button type="button" value="PDF" style="padding:6px;" class="btn btn-primary" onclick="pdf();">PDF</button>
+            Total reg: <span class="mark">@ViewBag.TotalRows</span>
+        </div>
+        <input type="hidden" id="idSelectedRow" value="1" />
+        @Html.Hidden("dir", sortDirection)
+        @Html.Hidden("col", sortColumn)
+    </div>
 
     <script>
-
-        $(document).ready(function () {
-            ajaxActualizaGrid();
-        });
-        function ajaxActualizaGrid() {
-            iconosOrdenGrid();
-            esteticaGrid();
-            pieEnCabeceraGrid();
-
-            //tras las llamadas ajax se requiere una carga dinamica del script
-            $.getScript("../Scripts/jquery.jeditable.min.js", function () {
-                ajaxDataSelect("/Trabajo/UnitsJSON/", "/Trabajo/RecaudacionUpdateSelectParam/", ".editable-select-units", dataTransformUnits);
-            });
-            
-        }
-        function dataTransformUnits(data, selected) {
-            var res = '';
-            for (var i = 0; i < data.length; i++) {
-                res = res + '"' + data[i].UNI_ID + '___' + data[i].UNI_DESCSHORT + '":"' + data[i].UNI_DESCSHORT + '"' + ',';
-                if (selected == data[i].UNI_DESCSHORT) selected = data[i].UNI_ID + '___' + data[i].UNI_DESCSHORT;
+        function selectUnits(selected) {
+            if (selected.length < 30) {
+                setTimeout(function seleccion() {
+                    $("select option:contains(" + selected + ")").attr('selected', true);
+                }, 30);
             }
-            return '{' + res + '"selected": "' + selected + '"}';
         }
-
     </script>
-</head>
-<body>
-
-
-    <div class="container">
-        <h3>@ViewBag.Message</h3>
-        <div id="searchBarId">
-            <form name="searchBarName" method="get" action="@Url.Content(ViewBag.url)" class="navbar-form navbar-right">
-                <div class="collapse navbar-collapse">
-                    <input type="text" name="search" value="@ViewBag.search" class="form-control" placeholder="Buscar" />
-                    <button type="submit" value="Search" class="btn btn-success">Buscar</button>
-                </div>
-            </form>
-        </div>
-
-        <div id="grid">
-            @grid.GetHtml(
-            tableStyle: "table table-responsive table-bordered",
-            footerStyle: "table-pager",
-            firstText: "|<",
-            lastText: ">|",
-            mode: WebGridPagerModes.All,
-            columns: grid.Columns(
-                grid.Column(columnName: "COL_ID", header: "Id", format:@<text><div>@item.COL_ID</div></text>),
-                grid.Column(columnName: "COL_UNI_ID", header: "Unidad", format:@<text><div id="divUnidad_@item.COL_ID" onclick="selectUnits($(this).text());" class="editable-select-units" data-id="@item.COL_ID" data-parametro="COL_UNI_ID">@item.COL_UNI_ID</div></text>),
-                grid.Column(columnName: "COL_NUM", header: "Número", format:@<text><div>@item.COL_NUM</div></text>),
-                grid.Column(columnName: "COL_DATE", header: "Fecha", format:@<text><div>@item.COL_DATE</div></text>),
-                grid.Column(columnName: "COL_INIDATE", header: "Inicio", format:@<text><div>@item.COL_INIDATE</div></text>),
-                grid.Column(columnName: "COL_ENDDATE", header: "Fin", format:@<text><div>@item.COL_ENDDATE</div></text>),
-                grid.Column(columnName: "COL_BACK_COL_TOTAL", header: "Total", format:@<text><div>@item.COL_BACK_COL_TOTAL</div></text>),
-                grid.Column(columnName: "COL_COIN_SYMBOL", header: "Moneda", format:@<text><div>@item.COL_COIN_SYMBOL</div></text>)
-                )
-            )
-            <div class="text-right">Total reg: <span class="mark">@ViewBag.TotalRows</span></div>
-            <input type="hidden" id="idSelectedRow" value="1" />
-            @Html.Hidden("dir", grid.SortDirection)
-            @Html.Hidden("col", grid.SortColumn)
-        </div>
-
-        <script>
-            function selectUnits(selected) {
-                if (selected.length < 30) {
-                    setTimeout(function seleccion() {
-                        $("select option:contains(" + selected + ")").attr('selected', true);
-                    }, 30);
-                }
-            }
-        </script>
-    </div>
-</body>
-</html>
+</div>

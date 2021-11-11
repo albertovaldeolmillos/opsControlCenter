@@ -13,3 +13,84 @@
     width: 100px;
     background-color: bisque;
 }
+
+#grid table {
+    //table-layout: fixed;
+}
+
+
+#grid table thead td {
+    text-align: center;
+}
+
+#grid table th, #grid table td {
+    border: 2px solid #C0C0C0;
+    padding: 1px;
+}
+
+#grid table thead .btn {
+    padding: 1px 5px;
+}
+
+#grid table tbody .btn {
+    padding: 2px 2px;
+}
+
+
+#grid table .btn-primary {
+    margin: 1px;
+}
+
+#grid table td table tr td {
+    border: 0;
+}
+
+#grid table tbody tr:hover {
+    background-color: aquamarine;
+}
+
+#grid table thead {
+    background-color: #F0F0F0;
+}
+
+.logo {
+    position: fixed;
+    bottom: 50px;
+    right: 0;
+}
+
+.form-inline .form-control{
+    display:inline;
+}
+
+input[type=datetime-local] {
+    border: 0;
+    background: transparent;
+}
+
+/*input datepicker*/
+.hasDatepicker {
+    width: 80px;
+}
+
+/*input datepicker + botones + selects timepicker  + botones*/
+.datetimeCol {
+    width: 300px;
+}
+
+.selectCol {
+    width: 100px;
+}
+
+.selectColLargo {
+    width: 300px;
+}
+
+.textCol {
+    width: 130px;
+}
+
+.textColLargo {
+    width: 330px;
+}
+

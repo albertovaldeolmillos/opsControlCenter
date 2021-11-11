@@ -1,0 +1,40 @@
+﻿@model List<opsControlCenter.Models.Alarmas>
+
+    <style>
+        thead {
+            background-color: black;
+            color: white
+        }
+
+        table {
+            border: 1px solid black;
+        }
+
+        td, th {
+            padding: 5px;
+            font-size: 14px;
+        }
+    </style>
+
+    <table class="table table-bordered table-striped" border="1" style="border-color:black">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Tipo</th>
+                <th>Unidad</th>
+                <th>Inicio</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.ALA_ID</td>
+                    <td>@item.DALA_DESCSHORT</td>
+                    <td>@item.UNI_DESCSHORT</td>
+                    <td>@item.ALA_INIDATE</td>
+                </tr>
+
+            }
+        </tbody>
+    </table>

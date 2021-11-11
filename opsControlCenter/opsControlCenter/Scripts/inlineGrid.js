@@ -13,9 +13,9 @@
             console.log('Settings.width: ' + settings.width);
             console.log('Submitdata: ' + submitdata.pwet);
         },
-        //cancel: 'Cancel',
-        cssclass: 'custom-class',
-        cancelcssclass: 'btn btn-danger',
+        
+        //cssclass: 'custom-class',
+        //cancelcssclass: 'btn btn-danger',
         //submitcssclass: 'btn btn-success',
         maxlength: 200,
         // select all text
@@ -24,7 +24,9 @@
         onreset: function () { console.log('Triggered before reset') },
         onsubmit: function () { console.log('Triggered before submit') },
         showfn: function (elem) { elem.fadeIn('slow') },
-        submit: 'OK',
+        submit: '<span style="margin-left:2px;" class="glyphicon glyphicon-ok btn btn-primary btn-sm"></span>',
+        //cancel: 'Cancel',
+        //cancel: '<span style="margin-left:2px;" class="glyphicon glyphicon-remove btn btn-primary btn-sm"></span>',
 
         submitdata: function (revert, settings, submitdata) {
             console.log("Revert text: " + revert);
@@ -32,12 +34,13 @@
             console.log("User submitted text: " + submitdata.value);
             return {
                 id: $(this).data('id'),
-                param: $(this).data('parametro')
+                param: $(this).data('parametro'),
+                original: $(this).data('original')
             }
         },
 
         tooltip: "Click to edit...",
-        width: 160
+        width: 100
     });
 
     //$(".editable-select").editable(urlInlineEdit, {
@@ -59,23 +62,45 @@
 function inlineDatepickerGrid(url, datepickerClass) {
     $(datepickerClass).editable(url, {
         type: 'datepicker',
-        submit: 'OK',
-        cancel: 'cancel',
+        submit: '<span style="margin-left:2px;" class="glyphicon glyphicon-ok btn btn-primary btn-sm"></span>',
+        cancel: '<span style="margin-left:2px;" class="glyphicon glyphicon-remove btn btn-primary btn-sm"></span>',
         onedit: function () { return true; },
         before: function () {  },
         datepicker: {
             format: "dd/mm/yy"
         },
         submitdata: function () {
-            
             return {
                 id: $(this).data('id'),
-                param: $(this).data('parametro')
+                param: $(this).data('parametro'),
+                original: $(this).data('original')
+            };
+        },
+        callback: function (result, settings, submitdata) {
+        },
+        onsubmit: function () {  },
+        tooltip: "Click to edit...",
+        style: "inherit"
+    });
+}
+function inlineTimepickerGrid(url, datepickerClass) {
+    //alert("aa" + url + datepickerClass);
+    $(datepickerClass).editable(url, {
+        type: 'time',
+        submit: '<span style="margin-left:2px;" class="glyphicon glyphicon-ok btn btn-primary btn-sm"></span>',
+        cancel: '<span style="margin-left:2px;" class="glyphicon glyphicon-remove btn btn-primary btn-sm"></span>',
+        onedit: function () { return true; },
+        submitdata: function () {
+            return {
+                id: $(this).data('id'),
+                param: $(this).data('parametro'),
+                original: $(this).data('original')
             };
         },
         tooltip: "Click to edit..."
     });
 }
+
 
 
 function inlineSelectEditGrid(url, selectClass,  data){
@@ -97,14 +122,17 @@ function inlineSelectEditGrid(url, selectClass,  data){
             //$("#detalleAlarmas")[0].innerHTML = $(this).data('id');
             //$('select>option:eq(3)').attr('selected', true);
         },
-        submit: "OK",
+        submit: '<span style="margin-left:2px;" class="glyphicon glyphicon-ok btn btn-primary btn-sm"></span>',
+        //cancel: 'Cancel',
+        //cancel: '<span style="margin-left:2px;" class="glyphicon glyphicon-remove btn btn-primary btn-sm"></span>',
         //submitcssclass: 'btn btn-success',
         submitdata: function () {
             //alert("aaaa" + $("select option:selected").text());
             //$("#detalleAlarmas")[0].innerHTML = $("select option:selected").text();
             return {
                 id: $(this).data('id'),
-                param: $(this).data('parametro')
+                param: $(this).data('parametro'),
+                original: $(this).data('original')
             };
         },
         style: "inherit",
@@ -125,6 +153,28 @@ function ajaxDataSelect(url, urlInlineEdit, classEdit, functionTransform) {
         error: function (xhr, ajaxOptions, thrownError) {
             alert(xhr.status);
             alert(thrownError);
+        }
+    });
+}
+
+function ajaxFilter(urlFilter, urlGet, formData) {
+    $.ajax({
+        type: 'POST',
+        url: urlFilter,
+        contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+        data: formData,
+        success: function (data) {
+            //alert(data);
+            var dir = $('#grid table tr th a').first()[0].href;
+            $('#grid table tr th a').first()[0].href = urlGet;
+            $('#grid table tr th a').first()[0].click();
+            $('#grid table tr th a').first()[0].href = dir;
+            //$("#grid").load(location.href + " #grid");
+            //setTimeout(function () { ajaxActualizaGrid(); }, 500);
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            //alert(xhr.status);
+            //alert(thrownError);
         }
     });
 }

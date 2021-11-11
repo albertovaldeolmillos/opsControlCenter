@@ -14,11 +14,11 @@ namespace opsControlCenter.Models
     
     public partial class ALARMS_DEF
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public ALARMS_DEF()
-        {
-            this.ALARMS = new HashSet<ALARMS>();
-        }
+        //[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        //public ALARMS_DEF()
+        //{
+        //    this.ALARMS = new HashSet<ALARMS>();
+        //}
     
         public decimal DALA_ID { get; set; }
         public string DALA_DESCSHORT { get; set; }
@@ -30,7 +30,7 @@ namespace opsControlCenter.Models
         public decimal DALA_DELETED { get; set; }
         public Nullable<decimal> DALA_DALV_ID { get; set; }
     
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<ALARMS> ALARMS { get; set; }
+        //[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        //public virtual ICollection<ALARMS> ALARMS { get; set; }
     }
 }
