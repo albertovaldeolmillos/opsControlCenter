@@ -48,10 +48,10 @@
 
 </script>
 
-<div class="container">
+<div>
     <h3>@ViewBag.Message</h3>
     <div id="searchBarId">
-        <form name="searchBarName" method="post" class="navbar-form navbar-right">
+        <form name="searchBarName" method="post">
             <div class="form-inline row">
                 <div class="col-sm-11">
                     @foreach (var elem in typeof(opsControlCenter.Models.Recaudacion).GetProperties())
@@ -98,7 +98,7 @@
         )
         @{ 
             var sortDirection = "ASC"; if (grid.SortDirection == SortDirection.Descending) { sortDirection = "DESC"; };
-            var sortColumn = "COL_ID"; if (grid.SortColumn != "undefined" && grid.SortColumn != "") { sortColumn = grid.SortColumn; };
+            var sortColumn = ""; if (grid.SortColumn != "undefined" && grid.SortColumn != "") { sortColumn = grid.SortColumn; };
         }
         <div class="text-right">
             <button type="button" value="XLS" style="padding:6px;" class="btn btn-primary" onclick="excel();">XLS</button>

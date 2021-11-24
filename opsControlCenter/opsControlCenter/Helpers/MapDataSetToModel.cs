@@ -82,6 +82,68 @@ namespace opsControlCenter.Helpers
 
         #endregion
 
+        #region Mapa
+        public List<AlarmasPorUnidad> AlarmsHisByUnitId(string idUnit)
+        {
+            using (DataSetObject dataSetObject = new DataSetObject())
+            {
+                string strModel = "AlarmasPorUnidad";
+                //string strSQL = "select * from " + strMunicipio + ".UNITS";
+
+                string strSQL = "select 1 as active, a.ala_uni_id, CONCAT(CONCAT(CONCAT(CONCAT(trunc(current_date  - a.ala_inidate),':'),trunc( mod( (current_date  - a.ala_inidate)*24, 24 ) )),':'),trunc( mod( (current_date  - a.ala_inidate)*24*60, 60 ) ))  diff, a.ala_inidate,ad.* from " + strMunicipio + ".alarms a inner join " + strMunicipio + ".alarms_def ad on ad.dala_id = a.ala_dala_id where a.ala_uni_id = " + idUnit;
+                strSQL = strSQL + "union all ";
+                strSQL = strSQL + "select 2 as active, ah.hala_uni_id, CONCAT(CONCAT(CONCAT(CONCAT(trunc(ah.hala_enddate  - ah.hala_inidate),':'),trunc( mod( (ah.hala_enddate  - ah.hala_inidate)*24, 24 ) )),':'),trunc( mod( (ah.hala_enddate  - ah.hala_inidate)*24*60, 60 ) ))  diff, ah.hala_inidate,ad.* from " + strMunicipio + ".alarms_his ah inner join " + strMunicipio + ".alarms_def ad on ad.dala_id = ah.hala_dala_id where ah.hala_uni_id = " + idUnit;
+
+                List<AlarmasPorUnidad> data = new List<AlarmasPorUnidad>();
+                DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
+                if (ds.Tables[strModel].Rows.Count > 0)
+                {
+                    var config = configMapModel.configAlarmsByUnitId();
+
+                    IMapper iMapper = config.CreateMapper();
+
+                    int cont = 0;
+                    foreach (DataRow row in ds.Tables[strModel].Rows)
+                    {
+                        AlarmasPorUnidad elem = iMapper.Map<DataRow, AlarmasPorUnidad>(ds.Tables[strModel].Rows[cont]);
+                        data.Add(elem);
+                        cont++;
+                    }
+                }
+                return data;
+            }
+        }
+
+        public List<OperacionesPorUnidad> OperationsByUnitId(string idUnit)
+        {
+            using (DataSetObject dataSetObject = new DataSetObject())
+            {
+                string strModel = "OperacionesPorUnidad";
+
+                string strSQL = "select o.ope_uni_id,o.ope_movdate,o.ope_vehicleid,o.ope_dope_id,od.dope_descshort,o.ope_dpay_id,pd.dpay_descshort from " + strMunicipio + ".operations o inner join " + strMunicipio + ".operations_def od on od.dope_id = o.ope_dope_id inner join " + strMunicipio + ".paytypes_def pd on pd.dpay_id = o.ope_dpay_id where o.ope_uni_id = " + idUnit;
+
+                List<OperacionesPorUnidad> data = new List<OperacionesPorUnidad>();
+                DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
+                if (ds.Tables[strModel].Rows.Count > 0)
+                {
+                    var config = configMapModel.configOperationsByUnitId();
+
+                    IMapper iMapper = config.CreateMapper();
+
+                    int cont = 0;
+                    foreach (DataRow row in ds.Tables[strModel].Rows)
+                    {
+                        OperacionesPorUnidad elem = iMapper.Map<DataRow, OperacionesPorUnidad>(ds.Tables[strModel].Rows[cont]);
+                        data.Add(elem);
+                        cont++;
+                    }
+                }
+                return data;
+            }
+        }
+
+        #endregion
+
         #region Comun
 
         public List<ALARMS_DEF> MapAlarmsDef()
@@ -151,6 +213,33 @@ namespace opsControlCenter.Helpers
                     foreach (DataRow row in ds.Tables[strModel].Rows)
                     {
                         UNITS elem = iMapper.Map<DataRow, UNITS>(ds.Tables[strModel].Rows[cont]);
+                        data.Add(elem);
+                        cont++;
+                    }
+                }
+                return data;
+            }
+        }
+
+        public List<UnidadesMapa> MapUnidadesMapa()
+        {
+            using (DataSetObject dataSetObject = new DataSetObject())
+            {
+                string strModel = "UnidadesMapa";
+                string strSQL = "select * from " + strMunicipio + ".UNITS u left join " + strMunicipio + ".map_pkmeters mp on mp.pkm_uni_id = u.uni_id where u.uni_dpuni_id=1";
+
+                List<UnidadesMapa> data = new List<UnidadesMapa>();
+                DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
+                if (ds.Tables[strModel].Rows.Count > 0)
+                {
+                    var config = configMapModel.configUnidadesMapa();
+
+                    IMapper iMapper = config.CreateMapper();
+
+                    int cont = 0;
+                    foreach (DataRow row in ds.Tables[strModel].Rows)
+                    {
+                        UnidadesMapa elem = iMapper.Map<DataRow, UnidadesMapa>(ds.Tables[strModel].Rows[cont]);
                         data.Add(elem);
                         cont++;
                     }

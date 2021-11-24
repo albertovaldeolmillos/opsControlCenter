@@ -9,13 +9,18 @@ namespace opsControlCenter.Helpers
 {
     public class SearchPagingSort
     {
-        MapDataSetToModel mapDataSetToModel = new MapDataSetToModel();
+        public MapDataSetToModel mapDataSetToModel = new MapDataSetToModel();
+        static List<Alarmas> Alarmas { get; set; }
+        static List<Recaudacion> Recaudacion { get; set; }
+        static List<AlarmasPorUnidad> AlarmsHisByUnitId { get; set; }
+        static List<OperacionesPorUnidad> OperationsByUnitId { get; set; }
         public List<Alarmas> GetAlarmas(FormCollection search, string sort, string sortdir, int skip, int pagesize, out int totalRecord)
         {
             List<Alarmas> data = new List<Alarmas>();
             totalRecord = 0;
-            
-            data = mapDataSetToModel.MapAlarmas();
+
+            if (skip == 0 && sort == "ALA_ID" && sortdir == "asc") Alarmas = mapDataSetToModel.MapAlarmas();
+            data = Alarmas;
 
             //if (search != "")
             //    data = data.Where(a => a.DALA_DESCSHORT.Contains(search) || a.UNI_DESCSHORT.Equals(search)).ToList();
@@ -33,13 +38,51 @@ namespace opsControlCenter.Helpers
             return data;
         }
 
+        public List<AlarmasPorUnidad> GetAlarmasByUnitId(string id, string sort, string sortdir, int skip, int pagesize, out int totalRecord)
+        {
+            List<AlarmasPorUnidad> data = new List<AlarmasPorUnidad>();
+            totalRecord = 0;
+
+            if (skip == 0 && sort == "ACTIVE" && sortdir == "asc") AlarmsHisByUnitId = mapDataSetToModel.AlarmsHisByUnitId(id); 
+            data = AlarmsHisByUnitId;
+
+            var property = typeof(AlarmasPorUnidad).GetProperty(sort);
+            if (sortdir == "ASC" || sortdir == "asc" || sortdir == "ascending") data = data.OrderBy(x => property.GetValue(x, null)).ToList();
+            else data = data.OrderByDescending(x => property.GetValue(x, null)).ToList();
+
+            totalRecord = data.Count;
+            if (pagesize > 0)
+                data = data.Skip(skip).Take(pagesize).ToList();
+
+            return data;
+        }
+
+        public List<OperacionesPorUnidad> GetOperacionesByUnitId(string id, string sort, string sortdir, int skip, int pagesize, out int totalRecord)
+        {
+            List<OperacionesPorUnidad> data = new List<OperacionesPorUnidad>();
+            totalRecord = 0;
+
+            if (skip == 0 && sort == "OPE_MOVDATE" && sortdir == "asc") OperationsByUnitId = mapDataSetToModel.OperationsByUnitId(id);
+            data = OperationsByUnitId;
+
+            var property = typeof(OperacionesPorUnidad).GetProperty(sort);
+            if (sortdir == "ASC" || sortdir == "asc" || sortdir == "ascending") data = data.OrderBy(x => property.GetValue(x, null)).ToList();
+            else data = data.OrderByDescending(x => property.GetValue(x, null)).ToList();
+
+            totalRecord = data.Count;
+            if (pagesize > 0)
+                data = data.Skip(skip).Take(pagesize).ToList();
+
+            return data;
+        }
+
         public List<Recaudacion> GetRecaudacion(FormCollection search, string sort, string sortdir, int skip, int pagesize, out int totalRecord)
         {
             List<Recaudacion> data = new List<Recaudacion>();
             totalRecord = 0;
 
-            data = mapDataSetToModel.MapRecaudacion();
-            decimal res = 0;
+            if (skip == 0 && sort == "COL_ID" && sortdir == "asc") Recaudacion = mapDataSetToModel.MapRecaudacion();
+            data = Recaudacion;
 
             //if (search != "" && Decimal.TryParse(search, out res))
             //    data = data.Where(a => a.COL_UNI_ID.Equals(Decimal.Parse(search))).ToList();
@@ -59,7 +102,7 @@ namespace opsControlCenter.Helpers
 
         #region general
 
-        List<T> Buscar<T>(PropertyInfo[] properties, FormCollection search, List<T> data)
+        public List<T> Buscar<T>(PropertyInfo[] properties, FormCollection search, List<T> data)
         {
             foreach (var prop in properties)
             {

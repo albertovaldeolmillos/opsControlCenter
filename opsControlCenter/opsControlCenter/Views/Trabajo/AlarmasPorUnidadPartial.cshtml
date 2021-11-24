@@ -1,0 +1,96 @@
+﻿
+@{
+    ViewBag.Title = "AlarmasPorUnidad";
+    ViewBag.url = "~/Trabajo/AlarmsByUnitId";
+    //para que funcione con ajax es necesario indicar el parametro: ajaxUpdateContainerId
+    //para realizar además alguna acción tras la recarga ajax se usa el parametro: ajaxUpdateCallback
+    //var grid = new WebGrid(Model,rowsPerPage:5);
+    //grid.Bind(source: Model,  autoSortAndPage: false);
+    //var grid = new WebGrid(source: Model, canPage: true, rowsPerPage: 5, ajaxUpdateCallback: "ajaxActualizaGrid", ajaxUpdateContainerId: "grid");
+    //grid.Bind( source: Model,rowCount: ViewBag.TotalRows, autoSortAndPage: false);
+
+    var grid = new WebGrid(canPage: true, rowsPerPage: ViewBag.PageSizeAlarmas, ajaxUpdateCallback: "ajaxActualizaGridAlarmas", ajaxUpdateContainerId: "gridAlarmas");
+    grid.Bind(source: Model, rowCount: ViewBag.TotalRowsAlarmas, autoSortAndPage: false);
+
+}
+
+
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+
+<link href="~/Scripts/jquery-ui.min.css" rel="stylesheet" />
+
+<script>
+
+    $(document).ready(function () {
+        ajaxActualizaGridAlarmas();
+    });
+    function ajaxActualizaGridAlarmas() {
+        var dir = $('#dirAlarmas').val();
+        var col = $('#colAlarmas').val();
+        if (col != "") {
+            var header = $("#gridAlarmas thead th a[href*=" + col + "]")[0];
+            if ((dir == "ASC") && (header != undefined)) {
+                header.text = header.text + " ▲";
+            }
+            if ((dir == "DESC") && (header != undefined)) {
+                header.text = header.text + " ▼";
+            }
+        }
+        $("#gridAlarmas tfoot a").addClass('btn btn-default'); // add bootstrap buttons
+        // add active bootstrap button
+        $("#gridAlarmas tfoot td")
+            .contents()
+            .filter(function () {
+                if (this.nodeType === 3 && this.length > 1) {
+                    return this.nodeType
+                }
+            })
+            .wrap('<span class="btn btn-primary" />');
+        if ($("#gridAlarmas thead").length > 0 && $("#gridAlarmas tfoot").length > 0) {
+            var tfoot = $("#gridAlarmas tfoot")[0].innerHTML;
+            var thead = $("#gridAlarmas thead")[0].innerHTML;
+            $("#gridAlarmas thead")[0].innerHTML = tfoot + thead;
+            $("#gridAlarmas tfoot")[0].innerHTML = "";
+
+        } 
+        if ($('#gridAlarmas table tbody tr').length == 0) {
+            $('#gridAlarmas').hide();
+        }
+        $('body').css("cursor", "default");
+        $('#grid').css("opacity", "1");
+    }
+
+</script>
+
+
+
+
+
+        @grid.GetHtml(
+        tableStyle: "table table-striped table-responsive table-bordered",
+        footerStyle: "table-pager",
+        firstText: "|<",
+        lastText: ">|",
+        mode: WebGridPagerModes.All,
+        columns: grid.Columns(
+                    grid.Column(columnName: "DALA_ID", header: "Tipo", format:@<text>@if (item.ACTIVE == "1") {<text><img src="../../Content/icons/stats_red/@{@item.DALA_ID}.png" title='@item.DALA_DESCLONG' /></text>} else {<text><img src="../../Content/icons/stats/@{@item.DALA_ID}.png" title='@item.DALA_DESCLONG' /></text>} </text>),
+                    grid.Column(columnName: "ALA_INIDATE", header: "Fecha", format:@<text><div>@item.ALA_INIDATE</div></text>),
+                    grid.Column(columnName: "DIFF", header: "Duración", format:@<text>@item.DIFF.Split(':')[0]d @item.DIFF.Split(':')[1]h @item.DIFF.Split(':')[2]m</text>),
+                    grid.Column(columnName : "ACTIVE", header: "Activo", format:@<text>@if (item.ACTIVE == "1") {<text>Si</text>} else {<text>No</text>} </text>)
+            )
+        )
+        @{ 
+            var sortDirection = "ASC"; if (grid.SortDirection == SortDirection.Descending) { sortDirection = "DESC"; };
+            var sortColumn = ""; if (grid.SortColumn != "undefined" && grid.SortColumn != "") { sortColumn = grid.SortColumn; };
+            var uniId = (Model.Count > 0) ? Model[0].ALA_UNI_ID : 0;
+        }
+        <div class="text-right">
+            Unidad @uniId - Alarmas: <span class="mark">@ViewBag.TotalRowsAlarmas</span><span>&nbsp;&nbsp;</span><button onclick="$('#gridAlarmas').hide();$('#map').height(700);" style="padding:1px 5px" class="btn btn-primary btn-sm glyphicon glyphicon-resize-vertical"></button>
+        </div>
+        @Html.Hidden("dirAlarmas", sortDirection)
+        @Html.Hidden("colAlarmas", sortColumn)
+
+
+
+

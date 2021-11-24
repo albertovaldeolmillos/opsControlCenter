@@ -1,10 +1,10 @@
 ﻿function pieEnCabeceraGrid() {
-    if ($("thead").length > 0 && $("tfoot").length > 0) {
-        var tfoot = $("tfoot")[0].innerHTML;
-        var thead = $("thead")[0].innerHTML;
+    if ($("#grid thead").length > 0 && $("#grid tfoot").length > 0) {
+        var tfoot = $("#grid tfoot")[0].innerHTML;
+        var thead = $("#grid thead")[0].innerHTML;
         //var search = "<tr>" + $("#searchBarId")[0].innerHTML + "</tr>";
-        $("thead")[0].innerHTML = tfoot + thead;
-        $("tfoot")[0].innerHTML = "";
+        $("#grid thead")[0].innerHTML = tfoot + thead;
+        $("#grid tfoot")[0].innerHTML = "";
     //$("#searchBarId")[0].innerHTML = "";
 
     //$("thead").append("<tr>" + tfoot + "</tr>");
@@ -14,19 +14,19 @@ function iconosOrdenGrid() {
     var dir = $('#dir').val();
     var col = $('#col').val();
     if (col != "") {
-        var header = $("th a[href*=" + col + "]")[0];
-        if (dir == "Ascending") {
+        var header = $("#grid thead th a[href*=" + col + "]")[0];
+        if ((dir == "ASC") && (header != undefined)) {
             header.text = header.text + " ▲";
         }
-        if (dir == "Descending") {
+        if ((dir == "DESC") && (header != undefined)) {
             header.text = header.text + " ▼";
         }
     }
 }
 function esteticaGrid() {
-    $("tfoot a").addClass('btn btn-default'); // add bootstrap buttons
+    $("#grid tfoot a").addClass('btn btn-default'); // add bootstrap buttons
     // add active bootstrap button
-    $("tfoot td")
+    $("#grid tfoot td")
         .contents()
         .filter(function () {
             if (this.nodeType === 3 && this.length > 1) {
@@ -41,8 +41,4 @@ function esteticaGrid() {
     //    $('tbody tr').not($(this)).removeClass('hovercs');
     //    $(this).addClass('clickable');  // add style to current row
     //});
-}
-//al paginar se queda cacheado y hace que no funcione correctamente, por eso se elimina.
-function eliminaDivDatapicker() {
-    $("#ui-datepicker-div").remove();
 }

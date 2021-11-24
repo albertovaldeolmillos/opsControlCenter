@@ -24,8 +24,8 @@ namespace opsControlCenter.Helpers
             {
                 if (Type.GetTypeCode(elem.PropertyType) == TypeCode.DateTime || elem.PropertyType == typeof(DateTime) || elem.PropertyType == typeof(DateTime?))
                     mappingExpression.ForMember(elem.Name, o => o.MapFrom(s => ((DataRow)s).IsNull(elem.Name) ? DateTime.Now : (((DataRow)s)[elem.Name].ToString() == "") ? DateTime.Now : ((DataRow)s)[elem.Name]));
-                else if (elem.PropertyType == typeof(decimal?))
-                    mappingExpression.ForMember(elem.Name, o => o.MapFrom(s => ((DataRow)s).IsNull(elem.Name) ? 0 : ((DataRow)s)[elem.Name]));
+                else if (elem.PropertyType == typeof(decimal) || elem.PropertyType == typeof(decimal?))
+                    mappingExpression.ForMember(elem.Name, o => o.MapFrom(s => ((DataRow)s).IsNull(elem.Name) ? 0 : (((DataRow)s)[elem.Name].ToString() == "") ? 0 : ((DataRow)s)[elem.Name]));
                 else
                     mappingExpression.ForMember(elem.Name, o => o.MapFrom(s => ((DataRow)s)[elem.Name]));
             }
@@ -81,6 +81,22 @@ namespace opsControlCenter.Helpers
             //return config;
         }
 
+        #endregion
+
+        #region Mapa
+        public MapperConfiguration configAlarmsByUnitId()
+        {
+            return configMapper<AlarmasPorUnidad>();
+        }
+
+        public MapperConfiguration configOperationsByUnitId()
+        {
+            return configMapper<OperacionesPorUnidad>();
+        }
+        public MapperConfiguration configUnidadesMapa()
+        {
+            return configMapper<UnidadesMapa>();
+        }
         #endregion
 
         #region Recaudacion

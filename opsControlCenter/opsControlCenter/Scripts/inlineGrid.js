@@ -178,3 +178,8 @@ function ajaxFilter(urlFilter, urlGet, formData) {
         }
     });
 }
+
+//al paginar se queda cacheado y hace que no funcione correctamente, por eso se elimina.
+function eliminaDivDatapicker() {
+    $("#ui-datepicker-div").remove();
+}

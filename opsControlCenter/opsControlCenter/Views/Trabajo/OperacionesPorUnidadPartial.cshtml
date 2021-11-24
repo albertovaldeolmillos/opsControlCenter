@@ -1,0 +1,93 @@
+﻿
+@{
+    ViewBag.Title = "OperacionesPorUnidad";
+    //para que funcione con ajax es necesario indicar el parametro: ajaxUpdateContainerId
+    //para realizar además alguna acción tras la recarga ajax se usa el parametro: ajaxUpdateCallback
+
+    //var grid = new WebGrid(source: Model, canPage: true, rowsPerPage: 5, ajaxUpdateCallback: "ajaxActualizaGrid", ajaxUpdateContainerId: "grid");
+
+    var grid = new WebGrid(canPage: true, rowsPerPage: ViewBag.PageSizeOperaciones, ajaxUpdateCallback: "ajaxActualizaGridOperaciones", ajaxUpdateContainerId: "gridOperaciones");
+    grid.Bind(source: Model, rowCount: ViewBag.TotalRowsOperaciones, autoSortAndPage: false);
+
+}
+
+
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+
+<link href="~/Scripts/jquery-ui.min.css" rel="stylesheet" />
+
+<script>
+
+    $(document).ready(function () {
+        ajaxActualizaGridOperaciones();
+    });
+    function ajaxActualizaGridOperaciones() {
+        var dir = $('#dirOperaciones').val();
+        var col = $('#colOperaciones').val();
+        if (col != "") {
+            var header = $("#gridOperaciones thead th a[href*=" + col + "]")[0];
+            if ((dir == "ASC") && (header != undefined)) {
+                header.text = header.text + " ▲";
+            }
+            if ((dir == "DESC") && (header != undefined)) {
+                header.text = header.text + " ▼";
+            }
+        }
+        $("#gridOperaciones tfoot a").addClass('btn btn-default'); // add bootstrap buttons
+        // add active bootstrap button
+        $("#gridOperaciones tfoot td")
+            .contents()
+            .filter(function () {
+                if (this.nodeType === 3 && this.length > 1) {
+                    return this.nodeType
+                }
+            })
+            .wrap('<span class="btn btn-primary" />');
+        if ($("#gridOperaciones thead").length > 0 && $("#gridOperaciones tfoot").length > 0) {
+            var tfoot = $("#gridOperaciones tfoot")[0].innerHTML;
+            var thead = $("#gridOperaciones thead")[0].innerHTML;
+            $("#gridOperaciones thead")[0].innerHTML = tfoot + thead;
+            $("#gridOperaciones tfoot")[0].innerHTML = "";
+
+        }  
+        if ($('#gridOperaciones table tbody tr').length == 0) {
+            $('#gridOperaciones').hide();
+        }
+        $('body').css("cursor", "default");
+        $('#grid').css("opacity", "1");
+    }
+
+</script>
+
+
+
+
+
+        @grid.GetHtml(
+        tableStyle: "table table-striped table-responsive table-bordered",
+        footerStyle: "table-pager",
+        firstText: "|<",
+        lastText: ">|",
+        mode: WebGridPagerModes.All,
+        columns: grid.Columns(
+                    grid.Column(columnName: "OPE_MOVDATE", header: "Fecha", format:@<text><div>@item.OPE_MOVDATE</div></text>),
+                    grid.Column(columnName: "OPE_VEHICLEID", header: "Matrícula", format:@<text><div>@item.OPE_VEHICLEID</div></text>),
+                    grid.Column(columnName : "DOPE_DESCSHORT", header: "Tipo", format:@<text><div>@item.DOPE_DESCSHORT</div></text>),
+                    grid.Column(columnName : "DPAY_DESCSHORT", header: "Forma de pago", format:@<text><div>@item.DPAY_DESCSHORT</div></text>)
+            )
+        )
+        @{ 
+            var sortDirection = "ASC"; if (grid.SortDirection == SortDirection.Descending) { sortDirection = "DESC"; };
+            var sortColumn = ""; if (grid.SortColumn != "undefined" && grid.SortColumn != "") { sortColumn = grid.SortColumn; };
+            var uniId = (Model.Count > 0) ? Model[0].OPE_UNI_ID : 0;
+        }
+        <div class="text-right">
+            Unidad @uniId - Operaciones: <span class="mark">@ViewBag.TotalRowsOperaciones</span><span>&nbsp;&nbsp;</span><button onclick="$('#gridOperaciones').hide();$('#map').height(700);" style="padding:1px 5px" class="btn btn-primary btn-sm glyphicon glyphicon-resize-vertical"></button>
+        </div>
+        @Html.Hidden("dirOperaciones", sortDirection)
+        @Html.Hidden("colOperaciones", sortColumn)
+
+
+
+

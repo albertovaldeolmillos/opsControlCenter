@@ -53,10 +53,12 @@
     background-color: #F0F0F0;
 }
 
-.logo {
-    position: fixed;
-    bottom: 50px;
-    right: 0;
+#footerFixed {
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: 100% 100%;
+    background-size: 63px 47px;
+    background-image: url("../../Content/Images/logoOPS_4.png");
 }
 
 .form-inline .form-control{

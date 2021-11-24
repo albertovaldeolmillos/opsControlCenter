@@ -1,0 +1,295 @@
+﻿@{
+    IEnumerable<opsControlCenter.Models.UnidadesMapa> units = ViewData["UNITS"] as IEnumerable<opsControlCenter.Models.UnidadesMapa>;
+    IEnumerable<opsControlCenter.Models.AlarmasPorUnidad> alarmas = ViewData["AlarmasPorUnidad"] as IEnumerable<opsControlCenter.Models.AlarmasPorUnidad>;
+    IEnumerable<opsControlCenter.Models.OperacionesPorUnidad> operaciones = ViewData["OperacionesPorUnidad"] as IEnumerable<opsControlCenter.Models.OperacionesPorUnidad>;
+}
+@{
+    string apiKey = System.Configuration.ConfigurationManager.AppSettings["GoogleMapsApiKey"];
+    string kml = System.Configuration.ConfigurationManager.AppSettings["GoogleMapsKML"];
+    string lon = System.Configuration.ConfigurationManager.AppSettings["GoogleMapsLonIni"];
+    string lat = System.Configuration.ConfigurationManager.AppSettings["GoogleMapsLatIni"];
+}
+
+@*<style>
+
+    #AlarmsByUnitId tbody {
+        display: block;
+        height: 200px;
+        overflow: auto;
+    }
+
+    #AlarmsByUnitId thead tr, #AlarmsByUnitId tbody tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    #AlarmsByUnitId thead {
+        width: calc( 100% - 1em )
+    }
+</style>*@
+
+<style>
+    #map {
+        transition-property: height;
+        transition-duration: 1s;
+        transition-timing-function: linear;
+        transition-delay: 0.5s;
+    }
+
+</style>
+
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script>
+
+
+    $(document).ready(function () {
+        loadGoogleMaps();
+    });
+
+    function loadGoogleMaps() {
+        var head = document.getElementsByTagName('head')[0];
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = 'https://maps.googleapis.com/maps/api/js?callback=initMap&key=' + $('#apiKey').val();
+        head.appendChild(script);
+    }
+
+    function initMap() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 11,
+            center: {
+                lat: parseFloat($('#lat').val()),
+                lng: parseFloat($('#lon').val())
+            }
+        });
+
+
+        var image = {
+            url: '../../Content/Images/pkmeter_4.png', //ruta de la imagen
+            size: new google.maps.Size(40, 65), //tamaño de la imagen
+            origin: new google.maps.Point(0, 0), //origen de la iamgen
+            //el ancla de la imagen, el punto donde esta marcando, en nuestro caso el centro inferior.
+            anchor: new google.maps.Point(20, 65)
+        };
+
+        var infowindow = new google.maps.InfoWindow({
+            content: '<div>info</div>'
+        });
+
+        var rowCount = $('#UNITS tbody tr').length;
+        for (var i = 0; i < rowCount; i++) {
+            image.url = '../../Content/Images/pkmeter_' + $('#UNITS tbody tr')[i].children[5].innerHTML + '.png';
+            const marcador = new google.maps.Marker({
+                position: ($('#UNITS tbody tr')[i].children[7].innerHTML != "") ? new google.maps.LatLng(parseFloat($('#UNITS tbody tr')[i].children[7].innerHTML.replace(',', '.')), parseFloat($('#UNITS tbody tr')[i].children[8].innerHTML.replace(',', '.'))) : new google.maps.LatLng(parseFloat($('#lon').val()) + 0.002 - (0.00001 * $('#UNITS tbody tr')[i].children[3].innerHTML), parseFloat($('#lat').val()) - 0.005 + (0.00001 * $('#UNITS tbody tr')[i].children[4].innerHTML)),
+                map: map,
+                label: $('#UNITS tbody tr')[i].children[0].innerHTML,
+                title: $('#UNITS tbody tr')[i].children[0].innerHTML + " - " + $('#UNITS tbody tr')[i].children[2].innerHTML,
+                animation: google.maps.Animation.DROP,
+                identificador: $('#UNITS tbody tr')[i].children[0].innerHTML,
+                draggable: false,
+                icon: image
+            });
+
+            google.maps.event.addListener(marcador, 'click', function () {
+                infowindow.close();
+                var contenido = marcador.getTitle() + "<br/><a href='#' onclick='alarmas(" + marcador.identificador + ")'>alarmas</a>" + "&nbsp;| &nbsp;<a href='#' onclick='operaciones(" + marcador.identificador + ")'>operaciones</a>";
+                infowindow.setContent(contenido);
+                infowindow.open(map, marcador);
+            });
+        }
+
+        var ctaLayer = new google.maps.KmlLayer({
+            url: 'https://www.google.com/maps/d/kml?mid=' + $('#kml').val(),
+            map: map
+        });
+    }
+    function alarmas(id) {
+        //alert(id);
+        ajaxAlarmasByUnitId(id)
+    }
+    function operaciones(id) {
+        //alert(id);
+        ajaxOperacionesByUnitId(id)
+    }
+
+    //function ajaxAlarmsByUnitId(id) {
+    //    $.ajax({
+    //        type: 'POST',
+    //        url: "/Trabajo/AlarmsByUnitIdJSON/",
+    //        //dataType: "json",
+    //        contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+    //        data: jQuery.param({ 'id': id }),
+    //        success: function (data) {
+    //            //alert(data[0].DIFF);
+    //            $('#AlarmsByUnitId tbody')[0].innerHTML = "";
+    //            $('#AlarmsByUnitId tfoot')[0].innerHTML = "Alarmas unidad " + id + ": " + data.length;
+    //            for (var i = 0; i < data.length; i++) {
+    //                var imageFolder = "stats/";
+    //                var activa = "No";
+    //                if (data[i].ACTIVE == 1) { imageFolder = "stats_red/"; activa = "Si"; }
+    //                var image = "<img src='../../Content/icons/" + imageFolder + data[i].DALA_ID + ".png' title='" + data[i].DALA_DESCLONG + "'/>";
+    //                var duracionArray = data[i].DIFF.split(':');
+    //                var duracion = duracionArray[0] + 'd ' + duracionArray[1] + 'h ' + duracionArray[2] + 'm';
+    //                $('#AlarmsByUnitId').append('<tr>' + '<td>' + image + '</td>' + '<td>' + convertToJavaScriptDate(data[i].ALA_INIDATE) + '</td>' + '<td>' + duracion + '</td>' + '<td>' + activa + '</td>' + '</tr>');
+    //            }
+    //            $('#AlarmsByUnitId').show();
+    //        },
+    //        error: function (xhr, ajaxOptions, thrownError) {
+    //            alert(id + " - " + xhr.status);
+    //            alert(thrownError);
+    //        }
+    //    });
+    //}
+
+    //function convertToJavaScriptDate(value) {
+    //    var pattern = /Date\(([^)]+)\)/;
+    //    var results = pattern.exec(value);
+    //    var dt = new Date(parseFloat(results[1]));
+    //    return decoraConCero(dt.getDay()) + "/" + decoraConCero(dt.getMonth()) + "/" + dt.getFullYear() + " " + decoraConCero(dt.getHours()) + ":" + decoraConCero(dt.getMinutes()) + ":" + decoraConCero(dt.getSeconds());
+    //}
+
+    //function decoraConCero(elem) {
+    //    if (elem < 10) elem = "0" + elem;
+    //    return elem;
+    //}
+
+    function ajaxAlarmasByUnitId(id) {
+        $('#map').height(500);
+        $('#gridOperaciones').hide();
+        $('#gridAlarmas').fadeIn();
+        $('body').css("cursor", "wait");
+        $('#grid').css("opacity", "0.1");
+        $.ajax({
+            type: 'GET',
+            url: "/Trabajo/MapaAlarmas/" + id,
+            //dataType: "json",
+            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+            //data: jQuery.param({ 'id': id }),
+            success: function (data) {
+                //$("#grid").html(data);
+                if ($('#gridAlarmas table tr th a').first().length != 0) {
+                    var dir = $('#gridAlarmas table tr th a').first()[0].href;
+                    $('#gridAlarmas table tr th a').first()[0].href = "/Trabajo/MapaAlarmas/" + id;
+                    $('#gridAlarmas table tr th a').first()[0].click();
+                    $('#gridAlarmas table tr th a').first()[0].href = dir;
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(id + " - " + xhr.status);
+                alert(thrownError);
+            }
+        });
+    }
+    function ajaxOperacionesByUnitId(id) {
+        $('#map').height(500);
+        $('#gridAlarmas').hide();
+        $('#gridOperaciones').fadeIn();
+        $('body').css("cursor", "wait");
+        $('#grid').css("opacity", "0.1");
+        $.ajax({
+            type: 'GET',
+            url: "/Trabajo/MapaOperaciones/" + id,
+            //dataType: "json",
+            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+            //data: jQuery.param({ 'id': id }),
+            success: function (data) {
+                //$("#grid").html(data);
+                if ($('#gridOperaciones table tr th a').first().length != 0) {
+                    var dir = $('#gridOperaciones table tr th a').first()[0].href;
+                    $('#gridOperaciones table tr th a').first()[0].href = "/Trabajo/MapaOperaciones/" + id;
+                    $('#gridOperaciones table tr th a').first()[0].click();
+                    $('#gridOperaciones table tr th a').first()[0].href = dir;
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(id + " - " + xhr.status);
+                alert(thrownError);
+            }
+        });
+    }
+
+
+</script>
+
+<input id="apiKey" type="hidden" value="@apiKey" />
+<input id="kml" type="hidden" value="@kml" />
+<input id="lon" type="hidden" value="@lon" />
+<input id="lat" type="hidden" value="@lat" />
+<div id="map" style="width:auto;height:700px"></div>
+
+@*<table class="table table-bordered table-striped" id="AlarmsByUnitId" style="display:none;">
+    <thead>
+        <tr>
+            <th>Tipo</th>
+            <th>Fecha</th>
+            <th>Duración</th>
+            <th>Activo</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+    <tfoot>
+    </tfoot>
+</table>*@
+
+<div id="grid">
+    <div id="gridAlarmas">
+        @{
+            if (alarmas == null)
+            {
+                List<opsControlCenter.Models.AlarmasPorUnidad> listVacia = new List<opsControlCenter.Models.AlarmasPorUnidad>();
+                alarmas = listVacia;
+                ViewBag.TotalRowsAlarmas = 0;
+                ViewBag.PageSizeAlarmas = 5;
+            }
+            Html.RenderPartial("AlarmasPorUnidadPartial", alarmas);
+        }
+    </div>
+
+    <div id="gridOperaciones">
+        @{
+            if (operaciones == null)
+            {
+                List<opsControlCenter.Models.OperacionesPorUnidad> listVacia = new List<opsControlCenter.Models.OperacionesPorUnidad>();
+                operaciones = listVacia;
+                ViewBag.TotalRowsOperaciones = 0;
+                ViewBag.PageSizeOperaciones = 5;
+            }
+            Html.RenderPartial("OperacionesPorUnidadPartial", operaciones);
+        }
+    </div>
+</div>
+
+<table class="table table-bordered table-striped" id="UNITS" border="1" style="border-color:black;display:none;">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Unidad</th>
+            <th>Desc</th>
+            <th>X</th>
+            <th>Y</th>
+            <th>Status</th>
+            <th>Zona</th>
+            <th>Latitud</th>
+            <th>Longitud</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in units)
+        {
+        <tr>
+            <td>@item.UNI_ID</td>
+            <td>@item.UNI_DESCSHORT</td>
+            <td>@item.UNI_DESCLONG</td>
+            <td>@item.UNI_POSX</td>
+            <td>@item.UNI_POSY</td>
+            <td>@item.UNI_DSTA_ID</td>
+            <td>@item.PKM_GRP_ID</td>
+            <td>@item.PKM_LAT</td>
+            <td>@item.PKM_LON</td>
+        </tr>
+
+        }
+    </tbody>
+</table>

@@ -13,6 +13,69 @@ namespace opsControlCenter.Controllers
 {
     public class TrabajoController : Controller
     {
+        #region Mapa
+        public ActionResult Mapa()
+        {
+            //FormCollection formCollection = new FormCollection();
+            //formCollection.Add("search_UNI_DPUNI_ID", "1");
+            //System.Reflection.PropertyInfo[] properties = typeof(UnidadesMapa).GetProperties();
+            //SearchPagingSort searchPagingSort = new SearchPagingSort();
+            //List<UnidadesMapa> units = searchPagingSort.Buscar<UnidadesMapa>(properties, formCollection, searchPagingSort.mapDataSetToModel.MapUnidadesMapa());
+            SearchPagingSort searchPagingSort = new SearchPagingSort();
+            List<UnidadesMapa> units = searchPagingSort.mapDataSetToModel.MapUnidadesMapa();
+            ViewData["UNITS"] = units;
+            return View("Mapa");
+        }
+
+        public ActionResult MapaAlarmas(string id, int page = 1, string sort = "ACTIVE", string sortdir = "asc")
+        {
+            SearchPagingSort searchPagingSort = new SearchPagingSort();
+            int pagesize = 5;
+            int totalRecord = 0;
+            if (page < 1) page = 1;
+            int skip = (page * pagesize) - pagesize;
+            List<AlarmasPorUnidad> alarmas = (id == null) ? new List<AlarmasPorUnidad>() : searchPagingSort.GetAlarmasByUnitId(id, sort, sortdir, skip, pagesize, out totalRecord);
+            ViewData["AlarmasPorUnidad"] = alarmas;
+            ViewBag.TotalRowsAlarmas = totalRecord;
+            ViewBag.Page = page;
+            ViewBag.PageSizeAlarmas = pagesize;
+            return Mapa();
+        }
+
+        public ActionResult MapaOperaciones(string id, int page = 1, string sort = "OPE_MOVDATE", string sortdir = "asc")
+        {
+            SearchPagingSort searchPagingSort = new SearchPagingSort();
+            int pagesize = 5;
+            int totalRecord = 0;
+            if (page < 1) page = 1;
+            int skip = (page * pagesize) - pagesize;
+            List<OperacionesPorUnidad> operaciones = (id == null) ? new List<OperacionesPorUnidad>() : searchPagingSort.GetOperacionesByUnitId(id, sort, sortdir, skip, pagesize, out totalRecord);
+            ViewData["OperacionesPorUnidad"] = operaciones;
+            ViewBag.TotalRowsOperaciones = totalRecord;
+            ViewBag.Page = page;
+            ViewBag.PageSizeOperaciones = pagesize;
+            return Mapa();
+        }
+
+        //[HttpPost]
+        //public ActionResult AlarmsByUnitId(string id)
+        //{
+        //    MapDataSetToModel mapDataSetToModel = new MapDataSetToModel();
+        //    List<AlarmasPorUnidad> data = mapDataSetToModel.AlarmsHisByUnitId(id);
+        //    return PartialView("AlarmasPorUnidadPartial", data);
+        //}
+
+        public ActionResult AlarmsByUnitIdJSON(string id)
+        {
+            MapDataSetToModel mapDataSetToModel = new MapDataSetToModel();
+            var data = mapDataSetToModel.AlarmsHisByUnitId(id);
+            var jsonData = Json(data);
+            var list = JsonConvert.SerializeObject(data);
+            return Json(data);
+        }
+
+        #endregion
+
         #region Alarmas
         //NOTA: Hay un problema al generalizar ya que los roles no se definen de la misma manera en todos los municipios.
         const string strRolesAlarmas = "admin, vigi";    
