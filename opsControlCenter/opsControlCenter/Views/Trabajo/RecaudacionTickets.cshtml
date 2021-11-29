@@ -1,0 +1,196 @@
+﻿@model List<opsControlCenter.Models.UnidadesMapa>
+
+<style>
+    table#tablePrint {width:100%;text-align:center;}
+	table#tablePrint table td {  FONT-FAMILY: Courier New; TEXT-ALIGN: center; width:500px;}	
+    table#tablePrint tr:nth-child(even) { background: #ddd }
+    @@media print{.noprint {display:none;}}
+</style>
+
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<link href="~/Scripts/jquery-ui.min.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+
+<script>
+    function populateCollectings() {
+        var unitId = $("#units").val();
+        $.ajax({
+            type: 'POST',
+            url: "/Trabajo/RecaudacionByUnitIdJSON/",
+            data: { "unitId": unitId },
+            success: function (data) {
+                $("#printCollecting").show();
+                $("#clearAll").show();
+                for (var i = 0; i < data.length; i++) {
+                    $("#collectings").append($('<option>').val(data[i].COL_ID).text(data[i].COL_ID + ' - ' + obtenerFecha(data[i].COL_INIDATE) + ' - ' + obtenerFecha(data[i].COL_ENDDATE)));
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        });
+    }
+    function populateCollecting() {
+        var colId = $("#collectings").val();
+        $.ajax({
+            type: 'POST',
+            url: "/Trabajo/CollectingnByColIdJSON/",
+            data: { "colId": colId },
+            success: function (data) {
+                calculaTablaImpresion(data);
+                //para obtener toda la información directamente del data y listarla por los nombres de campos y su valor
+                //calculaTabla(data);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        });
+    }
+    function calculaTabla1(data) {
+        var tabla1 = "<table>";
+        tabla1 = tabla1 + "<tr><td>REC.: " + data['COL_NUM'] + "</td></tr>";
+        tabla1 = tabla1 + "<tr><td>N.: " + data['COL_UNI_ID'] + "</td></tr>";
+        tabla1 = tabla1 + "<tr><td>PDM " + data['COL_UNI_ID'] + "</td></tr>";
+        tabla1 = tabla1 + "<tr><td>" + obtenerFecha(data['COL_INIDATE']) + "</td></tr>";
+        tabla1 = tabla1 + "<tr><td>" + obtenerFecha(data['COL_ENDDATE']) + "</td></tr>";
+        tabla1 = tabla1 + "<tr><td>--NÚMERO TIQUETS--</td></tr>";
+        tabla1 = tabla1 + "<tr><td>MONEDAS: " + data['COL_CASH_TOTAL_OPS'] + "</td></tr>";
+        tabla1 = tabla1 + "<tr><td>TARJ. CRÉDITO: " + data['COL_CRCARD_TOTAL_OPS'] + "</td></tr>";
+        tabla1 = tabla1 + "<tr><td>TARJ. CHIP: " + data['COL_CHCARD_TOTAL_OPS'] + "</td></tr>";
+        tabla1 = tabla1 + "<tr><td>-----MONEDAS-----</td></tr>";
+        tabla1 = tabla1 + "<tr><td>CONTENIDO CAJA:</td></tr>";
+        tabla1 = tabla1 + "<tr><td>#MON   TIPO   TOTAL</td></tr>";
+        for (var i = 0; i < Object.keys(data).length; i++) {
+            if (Object.keys(data)[i].indexOf("COL_CASH_COINS_Q") >= 0 && data[Object.keys(data)[i]] > 0) {
+                tabla1 = tabla1 + "<tr><td>" + data[Object.keys(data)[i]] + "  " + DosDecimales(0.01 * (data[Object.keys(data)[i - 1]])) + "  " + DosDecimales((data[Object.keys(data)[i]]) * 0.01 * (data[Object.keys(data)[i - 1]])) + "</td></tr>";
+            }
+        }
+        tabla1 = tabla1 + "<tr><td>TOTAL: " + DosDecimales(0.01 * data['COL_CASH_TOTAL']) + "  " + data['COL_COIN_SYMBOL'] + "</td></tr>";
+        tabla1 = tabla1 + "<tr><td>TARJ. CRÉDITO: " + DosDecimales(0.01 * data['COL_CRCARD_TOTAL_OPS']) + "  " + data['COL_COIN_SYMBOL'] + "</td></tr>";
+        tabla1 = tabla1 + "<tr><td>TARJ. CHIP: " + DosDecimales(0.01 * data['COL_CHCARD_TOTAL_OPS']) + "  " + data['COL_COIN_SYMBOL'] + "</td></tr>";
+        tabla1 = tabla1 + "<tr><td>----ACUMULADO----</td></tr>";
+        tabla1 = tabla1 + "<tr><td>HIST: " + DosDecimales(0.01 * data['COL_BACK_COL_TOTAL']) + "  " + data['COL_COIN_SYMBOL'] + "</td></tr>";
+        tabla1 = tabla1 + "<tr><td>ACTU: " + DosDecimales(0.01 * data['COL_CASH_TOTAL']) + "  " + data['COL_COIN_SYMBOL'] + "</td></tr>";
+        tabla1 = tabla1 + "<tr><td>TOTAL: " + DosDecimales(0.01 * data['COL_BACK_COL_TOTAL']) + "  " + data['COL_COIN_SYMBOL'] + "</td></tr>";
+        tabla1 = tabla1 + "<tr><td>----VALES----</td></tr>";
+        tabla1 = tabla1 + "<tr><td>NUMERO: " + data['COL_NUM_COUPONS'] + "</td></tr>";
+        tabla1 = tabla1 + "<tr><td>TIEMPO: " + data['COL_COUPONS_DURATION'] + "m" + "</td></tr>";
+        tabla1 = tabla1 + "<tr><td>VALOR: " + data['COL_COUPONS_VALUE'] + "  " + data['COL_COIN_SYMBOL'] + "</td></tr>";
+        tabla1 = tabla1 + "</table>";
+        return tabla1;
+    }
+    function calculaTabla2(data) {
+        var tabla2 = "<table>";
+        tabla2 = tabla2 + "<tr><td>REC.: " + data['COL_NUM'] + "</td></tr>";
+        tabla2 = tabla2 + "<tr><td>N.: " + data['COL_UNI_ID'] + "</td></tr>";
+        tabla2 = tabla2 + "<tr><td>PDM " + data['COL_UNI_ID'] + "</td></tr>";
+        tabla2 = tabla2 + "<tr><td>" + obtenerFecha(data['COL_INIDATE']) + "</td></tr>";
+        tabla2 = tabla2 + "<tr><td>" + obtenerFecha(data['COL_ENDDATE']) + "</td></tr>";
+        tabla2 = tabla2 + "<tr><td>-TICKETS X TARIFA-</td></tr>";
+        for (var i = 0; i < Object.keys(data).length; i++) {
+            if (Object.keys(data)[i].indexOf("COL_CMI_") >= 0) {
+                //var tipo = Object.keys(data)[i].split("_")[2];
+                var tipo = "";
+                if (Object.keys(data)[i] == "COL_CMI_050") tipo = "0,50"; if (Object.keys(data)[i] == "COL_CMI_050_075") tipo = "0,75";
+                if (Object.keys(data)[i] == "COL_CMI_075_100") tipo = "1,00"; if (Object.keys(data)[i] == "COL_CMI_100_075") tipo = "1,50";
+                if (Object.keys(data)[i] == "COL_CMI_150_075") tipo = "2,00"; if (Object.keys(data)[i] == "COL_CMI_200_075") tipo = "2,50";
+                if (Object.keys(data)[i] == "COL_CMI_250_075") tipo = "3,00"; if (Object.keys(data)[i] == "COL_CMI_300_075") tipo = "4,00";
+                if (Object.keys(data)[i] == "COL_CMI_400_075") tipo = "5,00"; if (Object.keys(data)[i] == "COL_CMI_500") tipo = ">5,00";
+                tabla2 = tabla2 + "<tr><td>" + data[Object.keys(data)[i]] + "  " + tipo + "</td></tr>";
+            }
+        }
+        tabla2 = tabla2 + "<tr><td>-TICKETS X HORARIO-</td></tr>";
+        for (var i = 0; i < Object.keys(data).length; i++) {
+            if (Object.keys(data)[i].indexOf("COL_CTI_") >= 0) {
+                var tipo = "";
+                var tipoArr = Object.keys(data)[i].split("_");
+                if (tipoArr.length == 4) tipo = tipoArr[3]; else tipo = tipoArr[2];
+                tipo = tipo.substring(0, 2) + ":" + tipo.substring(2, tipo.length);
+                tabla2 = tabla2 + "<tr><td>" + data[Object.keys(data)[i]] + "  " + tipo + "</td></tr>";
+            }
+        }
+        tabla2 = tabla2 + "<tr><td>-TICKETS X MOD. PAGO-</td></tr>";
+        tabla2 = tabla2 + "<tr><td>-MONEDAS-</td></tr>";
+        tabla2 = tabla2 + "<tr><td>     IMPORTE     #OPS</td></tr>";
+        tabla2 = tabla2 + "<tr><td>AP:     " + DosDecimales(0.01 * data['COL_CASH_PARK']) + "      " + data['COL_CASH_PARK_OPS'] + "</td></tr>";
+        tabla2 = tabla2 + "<tr><td>MULTA:     " + DosDecimales(0.01 * data['COL_CASH_FINE']) + "      " + data['COL_CASH_FINE_OPS'] + "</td></tr>";
+        tabla2 = tabla2 + "<tr><td>RECR:     " + DosDecimales(0.01 * data['COL_CASH_RECHARGE']) + "      " + data['COL_CASH_RECHARGE_OPS'] + "</td></tr>";
+        tabla2 = tabla2 + "<tr><td>-TARJ. CHIP-</td></tr>";
+        tabla2 = tabla2 + "<tr><td>     IMPORTE     #OPS</td></tr>";
+        tabla2 = tabla2 + "<tr><td>AP:     " + DosDecimales(0.01 * data['COL_CHCARD_PARK']) + "      " + data['COL_CHCARD_PARK_OPS'] + "</td></tr>";
+        tabla2 = tabla2 + "<tr><td>MULTA:     " + DosDecimales(0.01 * data['COL_CHCARD_FINE']) + "      " + data['COL_CHCARD_FINE_OPS'] + "</td></tr>";
+        tabla2 = tabla2 + "<tr><td>DEV:     " + DosDecimales(0.01 * data['COL_CHCARD_RETURN']) + "      " + data['COL_CHCARD_RETURN_OPS'] + "</td></tr>";
+        tabla2 = tabla2 + "<tr><td>-TARJ. CRÉDITO-</td></tr>";
+        tabla2 = tabla2 + "<tr><td>     IMPORTE     #OPS</td></tr>";
+        tabla2 = tabla2 + "<tr><td>AP:     " + DosDecimales(0.01 * data['COL_CRCARD_PARK']) + "      " + data['COL_CRCARD_PARK_OPS'] + "</td></tr>";
+        tabla2 = tabla2 + "<tr><td>MULTA:     " + DosDecimales(0.01 * data['COL_CRCARD_FINE']) + "      " + data['COL_CRCARD_FINE_OPS'] + "</td></tr>";
+        tabla2 = tabla2 + "<tr><td>RECR:     " + DosDecimales(0.01 * data['COL_CRCARD_RECHARGE']) + "      " + data['COL_CRCARD_RECHARGE_OPS'] + "</td></tr>";
+        return tabla2;
+    }
+    function calculaTablaImpresion(data) {
+        var tabla = "<table id='tablePrint'>";
+        tabla = tabla + "<tr><td width='10 %'></td><td>" + calculaTabla1(data) + "</td><td width='10 %'></td><td>" + calculaTabla2(data) +  "</td></tr>";
+        tabla = tabla + "</table>";
+        $("#tableCollectingPrint").html(tabla);
+    }
+    function calculaTabla(data) {
+        var tabla = "<table>";
+        for (var i = 0; i < Object.keys(data).length; i++) {
+            var valor = data[Object.keys(data)[i]];
+            if (Object.keys(data)[i] == "COL_DATE" || Object.keys(data)[i] == "COL_INIDATE" || Object.keys(data)[i] == "COL_ENDDATE") {
+                valor = obtenerFecha(valor);
+            }
+            tabla = tabla + "<tr><td>" + Object.keys(data)[i] + "</td><td>" + valor + "</td></tr>";
+        }
+        tabla = tabla + "</table>";
+        $("#tableCollecting").html(tabla);
+    }
+    function DosDecimales(num) {
+        return (Math.round(num * 100) / 100).toFixed(2);
+    }
+    function obtenerFecha(fecha) {
+        var pattern = /Date\(([^)]+)\)/;
+        var resultsIni = pattern.exec(fecha);
+        var dtIni = new Date(parseFloat(resultsIni[1]));
+        var fechaIni = PoneCeros(dtIni.getDate()) + "/" + PoneCeros(dtIni.getMonth() + 1) + "/" + dtIni.getFullYear() + " " + PoneCeros(dtIni.getHours()) + ":" + PoneCeros(dtIni.getMinutes()) + ":" + PoneCeros(dtIni.getSeconds());
+        return fechaIni;
+    }
+    function PoneCeros(elem) {
+        elem = parseInt(elem);
+        if (elem < 10) elem = "0" + elem;
+        return elem;
+    }
+</script>
+
+<h4>Tickets Recaudación</h4>
+<hr/>
+<div class="form-horizontal noprint">
+    <div class="form-group">
+        <label class="control-label col-md-2" for="units">Unidad</label>
+        <div class="col-md-4">
+            <select id="units" class="form-control" onchange="populateCollectings()">
+                <option value="" selected disabled>--</option>
+                @foreach (var item in Model)
+                {
+                    <option value="@item.UNI_ID">@item.UNI_ID - @item.UNI_DESCSHORT - @item.UNI_DESCLONG</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-md-2" for="collectings">Recaudación</label>
+        <div class="col-md-4">
+            <select id="collectings" class="form-control" onchange="populateCollecting()">
+                <option value="" selected disabled>--</option>
+            </select>
+        </div>
+        <button id="printCollecting" type="button" value="Imprimir" style="padding:6px;display:none;" class="btn btn-primary glyphicon glyphicon-print" onclick="window.print();"></button>
+        <button id="clearAll" type="button" value="Limpiar" style="padding:6px;display:none;" class="btn btn-primary glyphicon glyphicon-refresh" onclick="location.reload();"></button>
+    </div>
+</div>
+<div id="tableCollectingPrint"></div>
+<div id="tableCollecting"></div>
+
+

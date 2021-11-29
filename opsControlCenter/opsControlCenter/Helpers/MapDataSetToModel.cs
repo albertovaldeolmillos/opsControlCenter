@@ -80,6 +80,35 @@ namespace opsControlCenter.Helpers
             }
         }
 
+        public List<Recaudacion> MapRecaudacionByUnitId(string idUnit)
+        {
+            using (DataSetObject dataSetObject = new DataSetObject())
+            {
+                string strModel = "Recaudacion";
+                string strSQL = "select COL_ID, COL_UNI_ID, UNI_DESCSHORT, COL_NUM, COL_DATE, COL_INIDATE, COL_ENDDATE, COL_BACK_COL_TOTAL, COL_COIN_SYMBOL " +
+                    "from " + strMunicipio + ".collectings " +
+                    "inner join " + strMunicipio + ".units on collectings.col_uni_id = units.uni_id where COL_UNI_ID = " + idUnit;
+
+                List<Recaudacion> data = new List<Recaudacion>();
+                DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
+                if (ds.Tables[strModel].Rows.Count > 0)
+                {
+                    var config = configMapModel.configRecaudacion();
+
+                    IMapper iMapper = config.CreateMapper();
+
+                    int cont = 0;
+                    foreach (DataRow row in ds.Tables[strModel].Rows)
+                    {
+                        Recaudacion elem = iMapper.Map<DataRow, Recaudacion>(ds.Tables[strModel].Rows[cont]);
+                        data.Add(elem);
+                        cont++;
+                    }
+                }
+                return data;
+            }
+        }
+
         #endregion
 
         #region Mapa
@@ -189,6 +218,27 @@ namespace opsControlCenter.Helpers
                     IMapper iMapper = config.CreateMapper();
 
                     data = iMapper.Map<DataRow, ALARMS_DEF>(ds.Tables[strModel].Rows[0]);
+                }
+                return data;
+            }
+        }
+
+        public COLLECTINGS MapCollecting(string id)
+        {
+            using (DataSetObject dataSetObject = new DataSetObject())
+            {
+                string strModel = "COLLECTINGS";
+                string strSQL = "SELECT * FROM " + strMunicipio + ".COLLECTINGS WHERE COL_ID=" + id;
+
+                COLLECTINGS data = new COLLECTINGS();
+                DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
+                if (ds.Tables[strModel].Rows.Count > 0)
+                {
+                    var config = configMapModel.configCollectings();
+
+                    IMapper iMapper = config.CreateMapper();
+
+                    data = iMapper.Map<DataRow, COLLECTINGS>(ds.Tables[strModel].Rows[0]);
                 }
                 return data;
             }

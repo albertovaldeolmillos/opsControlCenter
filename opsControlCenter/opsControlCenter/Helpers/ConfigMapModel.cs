@@ -161,6 +161,11 @@ namespace opsControlCenter.Helpers
             // );
             //return config;
         }
+
+        public MapperConfiguration configCollectings()
+        {
+            return configMapper<COLLECTINGS>();
+        }
         #endregion
 
         #region Usuario rol

@@ -117,6 +117,6 @@ namespace opsControlCenter.Models
         public Nullable<decimal> COL_COUPONS_VALUE { get; set; }
         public Nullable<decimal> COL_COUPONS_DURATION { get; set; }
     
-        public virtual UNITS UNITS { get; set; }
+        //public virtual UNITS UNITS { get; set; }
     }
 }

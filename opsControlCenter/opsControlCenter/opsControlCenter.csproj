@@ -368,6 +368,7 @@
     <Content Include="Views\Trabajo\Mapa.cshtml" />
     <Content Include="Views\Trabajo\AlarmasPorUnidadPartial.cshtml" />
     <Content Include="Views\Trabajo\OperacionesPorUnidadPartial.cshtml" />
+    <Content Include="Views\Trabajo\RecaudacionTickets.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

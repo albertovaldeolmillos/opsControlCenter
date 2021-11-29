@@ -225,6 +225,16 @@ namespace opsControlCenter.Controllers
         #endregion
 
         #region Recaudacion
+
+        [MyAuthorize]
+        public ActionResult RecaudacionTickets()
+        {
+            SearchPagingSort searchPagingSort = new SearchPagingSort();
+            List<UnidadesMapa> units = searchPagingSort.mapDataSetToModel.MapUnidadesMapa();
+            ViewData["UNITS"] = units;
+            return View("RecaudacionTickets",units);
+        }
+
         [MyAuthorize]
         public ActionResult Recaudacion(int page = 1, string sort = "COL_ID", string sortdir = "asc")
         {
@@ -362,6 +372,27 @@ namespace opsControlCenter.Controllers
             var list = JsonConvert.SerializeObject(data);
             return Json(data);
         }
+
+        [HttpPost]
+        public ActionResult RecaudacionByUnitIdJSON(string unitId)
+        {
+            SearchPagingSort searchPagingSort = new SearchPagingSort();
+            List<Recaudacion> recaudacionPorUnidad = searchPagingSort.mapDataSetToModel.MapRecaudacionByUnitId(unitId);
+            var jsonData = Json(recaudacionPorUnidad);
+            var list = JsonConvert.SerializeObject(recaudacionPorUnidad);
+            return Json(recaudacionPorUnidad);
+        }
+
+        [HttpPost]
+        public ActionResult CollectingnByColIdJSON(string colId)
+        {
+            SearchPagingSort searchPagingSort = new SearchPagingSort();
+            COLLECTINGS collecting = searchPagingSort.mapDataSetToModel.MapCollecting(colId);
+            var jsonData = Json(collecting);
+            var list = JsonConvert.SerializeObject(collecting);
+            return Json(collecting);
+        }
+
         #endregion
 
     }
