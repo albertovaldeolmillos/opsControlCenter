@@ -1,5 +1,6 @@
 namespace opsControlCenter.Models
 {
+    using System;
     using System.ComponentModel;
 
     public partial class Alarmas
@@ -16,6 +17,7 @@ namespace opsControlCenter.Models
         public string UNI_DESCSHORT { get; set; }
         [DisplayName("Inicio")]
         public System.DateTime ALA_INIDATE { get; set; }
-
+        [DisplayName("Nivel")]
+        public Nullable<decimal> DALA_DALV_ID { get; set; }
     }
 }

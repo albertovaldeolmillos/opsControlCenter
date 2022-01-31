@@ -21,7 +21,7 @@ namespace opsControlCenter.Helpers
             using (DataSetObject dataSetObject = new DataSetObject())
             {
                 string strModel = "Alarmas";
-                string strSQL = "select ala_id, ala_dala_id, dala_descshort, ala_uni_id, uni_descshort, ala_inidate " +
+                string strSQL = "select ala_id, ala_dala_id, dala_descshort, ala_uni_id, uni_descshort, ala_inidate, dala_dalv_id " +
                     "from " + strMunicipio + ".alarms " +
                     "inner join " + strMunicipio + ".alarms_def on alarms.ala_dala_id = alarms_def.dala_id " +
                     "inner join " + strMunicipio + ".units on alarms.ala_uni_id = units.uni_id";
@@ -290,6 +290,43 @@ namespace opsControlCenter.Helpers
                     foreach (DataRow row in ds.Tables[strModel].Rows)
                     {
                         UnidadesMapa elem = iMapper.Map<DataRow, UnidadesMapa>(ds.Tables[strModel].Rows[cont]);
+                        data.Add(elem);
+                        cont++;
+                    }
+                }
+                return data;
+            }
+        }
+
+        public List<UnidadesInstalacion> MapUnidadesInstalacion()
+        {
+            using (DataSetObject dataSetObject = new DataSetObject())
+            {
+                string strModel = "UnidadesInstalacion";
+                string strSQL = "select g2.grp_id as idZona, g2.grp_descshort as zona, g.grp_id as idSector, g.grp_descshort as sector,gc.*,u.*,sd.DSTA_DESCSHORT,DALA_ID,DALA_DALV_ID ";
+                strSQL = strSQL + "from " + strMunicipio + ".groups g ";
+                strSQL = strSQL + "inner join " + strMunicipio + ".groups_childs gc on g.grp_id = gc.cgrp_id ";
+                strSQL = strSQL + "inner join " + strMunicipio + ".groups_childs gc2 on gc2.cgrp_child = gc.cgrp_id ";
+                strSQL = strSQL + "inner join " + strMunicipio + ".groups g2 on g2.grp_id = gc2.cgrp_id ";
+                strSQL = strSQL + "inner join " + strMunicipio + ".units u on u.uni_id = gc.cgrp_child ";
+                strSQL = strSQL + "inner join " + strMunicipio + ".status_def sd on sd.dsta_id = u.uni_dsta_id ";
+                //strSQL = strSQL + "inner join " + strMunicipio + ".alarms a on a.ala_uni_id = u.uni_id ";
+                //strSQL = strSQL + "inner join " + strMunicipio + ".alarms_def ad on ad.dala_id = a.ala_dala_id ";   
+                strSQL = strSQL + "left join (select a.ala_uni_id,max(a.ala_dala_id) DALA_ID,max(ad.dala_dalv_id) DALA_DALV_ID from " + strMunicipio + ".alarms a inner join " + strMunicipio + ".alarms_def ad on ad.dala_id = a.ala_dala_id group by a.ala_uni_id) b on u.uni_id = b.ala_uni_id ";
+                strSQL = strSQL + "where u.uni_deleted = 0 and u.uni_dpuni_id = 1 and gc.cgrp_type = 'U' order by idZona,idSector,u.uni_id";
+
+                List<UnidadesInstalacion> data = new List<UnidadesInstalacion>();
+                DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
+                if (ds.Tables[strModel].Rows.Count > 0)
+                {
+                    var config = configMapModel.configUnidadesInstalacion();
+
+                    IMapper iMapper = config.CreateMapper();
+
+                    int cont = 0;
+                    foreach (DataRow row in ds.Tables[strModel].Rows)
+                    {
+                        UnidadesInstalacion elem = iMapper.Map<DataRow, UnidadesInstalacion>(ds.Tables[strModel].Rows[cont]);
                         data.Add(elem);
                         cont++;
                     }

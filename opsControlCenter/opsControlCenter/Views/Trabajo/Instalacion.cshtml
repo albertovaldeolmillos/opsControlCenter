@@ -1,0 +1,397 @@
+﻿@{
+    IEnumerable<opsControlCenter.Models.UnidadesInstalacion> units = ViewData["UnidadesInstalacion"] as IEnumerable<opsControlCenter.Models.UnidadesInstalacion>;
+    IEnumerable<opsControlCenter.Models.UnidadesInstalacion> zonas = units.GroupBy(p => p.idZona).Select(g => g.First()).ToList();
+    IEnumerable<opsControlCenter.Models.UnidadesInstalacion> sectores = units.GroupBy(p => p.idSector).Select(g => g.First()).ToList();
+    IEnumerable<opsControlCenter.Models.UnidadesInstalacion> estados = units.GroupBy(p => p.UNI_DSTA_ID).Select(g => g.First()).ToList();
+
+    IEnumerable<opsControlCenter.Models.AlarmasPorUnidad> alarmas = ViewData["AlarmasPorUnidad"] as IEnumerable<opsControlCenter.Models.AlarmasPorUnidad>;
+    IEnumerable<opsControlCenter.Models.OperacionesPorUnidad> operaciones = ViewData["OperacionesPorUnidad"] as IEnumerable<opsControlCenter.Models.OperacionesPorUnidad>;
+
+    string lista = "<div class='container'>";
+    foreach (var zona in zonas)
+    {
+        lista = lista + "<div style='display:table-cell;float:left;'>";//
+        lista = lista + "<ul class='tree'>";
+        lista = lista + "<li id='zona_" + zona.idZona + "' class='parentZona'><span>" + zona.zona + "</span>";
+        lista = lista + "<ul>";
+        foreach (var sector in sectores.Where(z => z.idZona == zona.idZona).ToList())
+        {
+            lista = lista + "<li id='sector_" + sector.idSector + "' class='parentSector'><span>" + sector.sector + "</span>";
+            lista = lista + "<ul>";
+            foreach (var unidad in units.Where(u => u.idZona == zona.idZona && u.idSector == sector.idSector))
+            {
+                int alarmImage = 0; string strImage = "Sin alarmas";
+                if (unidad.DALA_DALV_ID > 0) { alarmImage = 1; strImage = "Con alarmas"; }
+                if (unidad.DALA_ID == 1000) { alarmImage = 3; strImage = "Desconectado"; }
+                lista = lista + "<li onclick='ajaxByUnitId(" + unidad.UNI_ID + ")' class='unidad' id='unidad_" + unidad.UNI_ID + "' title='" + unidad.UNI_DESCLONG + "' nivel='" + unidad.DALA_DALV_ID + "'>";
+                lista = lista + "<span class='status_" + unidad.UNI_DSTA_ID + "'>" + unidad.UNI_DESCSHORT + "<sup>" + unidad.DALA_DALV_ID + "</sup></span>";
+                lista = lista + "<div><img src='../Content/Images/pk_" + alarmImage + ".png' title='" + strImage + "'></div>";
+                lista = lista + "</li>";
+            }
+            lista = lista + "</ul>";
+            lista = lista + "</li>";
+        }
+        lista = lista + "</ul>";
+        lista = lista + "</li>";
+        lista = lista + "</ul>";
+        lista = lista + "</div>";
+    }
+    lista = lista + "</div>";
+}
+
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script>
+    //$(document).ready(function () {
+    //    $(".tree .parentZona").click(function (e) {
+    //        e.stopPropagation();
+    //        $(this).find(">ul").toggle("slow");
+    //        if ($(this).hasClass("close1"))
+    //            $(this).removeClass("close1");
+    //        else
+    //            $(this).addClass("close1");
+    //    });
+    //});
+    $(document).ready(function () {
+        $(".parentZona").click(function (e) {
+            e.stopPropagation();
+            $(this).hide();
+            $("#group").append("<span id='span_" + $(this).attr('id') + "' onclick='actualizaZonaSector(\"" + $(this).attr('id') + "\")'>" + $(this).find('span').html() + "</span>");
+        });
+        //$(".parentSector").click(function (e) {
+        //    e.stopPropagation();
+        //    $(this).hide();
+        //    $("#group").append("<span id='span_" + $(this).attr('id') + "' onclick='actualizaZonaSector(\"" + $(this).attr('id') + "\")'>" + $(this).find('span').html() + "</span>");
+        //});
+        $(".unidad").click(function (e) {
+            e.stopPropagation();
+        });
+        $("#tipoAlarmas").click(function (e) {
+            $(this).addClass("activo1 bg-primary");
+            $("#tipoOperaciones").removeClass("activo1 bg-primary");
+            if ($(".unitSelected").length > 0)
+                ajaxAlarmasByUnitId($(".unitSelected").parent().attr('id').split('_')[1]); 
+        });
+        $("#tipoOperaciones").click(function (e) {
+            $(this).addClass("activo1 bg-primary");
+            $("#tipoAlarmas").removeClass("activo1 bg-primary");
+            if ($(".unitSelected").length > 0)
+                ajaxOperacionesByUnitId($(".unitSelected").parent().attr('id').split('_')[1]); 
+        });
+        $("#levelTodos").click(function (e) {
+            $("#level0").addClass("activo1 bg-primary");
+            $("#level1").addClass("activo1 bg-primary");
+            $("#level2").addClass("activo1 bg-primary");
+            $("#level3").addClass("activo1 bg-primary");
+            $("#level4").addClass("activo1 bg-primary");
+            mostrarUnidades();
+            $(this).addClass("activo1 bg-primary");
+            $("#level0").removeClass("activo1 bg-primary");
+            $("#level1").removeClass("activo1 bg-primary");
+            $("#level2").removeClass("activo1 bg-primary");
+            $("#level3").removeClass("activo1 bg-primary");
+            $("#level4").removeClass("activo1 bg-primary");  
+            $("#group span").remove("span");
+        });
+        $("#level0").click(function (e) {
+            if ($(this).hasClass("activo1 bg-primary")) $(this).removeClass("activo1 bg-primary");
+            else $(this).addClass("activo1 bg-primary");
+            $("#levelTodos").removeClass("activo1 bg-primary");
+            mostrarUnidades();
+            $("#group span").remove("span");
+        });
+        $("#level1").click(function (e) {
+            if ($(this).hasClass("activo1 bg-primary")) $(this).removeClass("activo1 bg-primary");
+            else $(this).addClass("activo1 bg-primary");
+            $("#levelTodos").removeClass("activo1 bg-primary");
+            mostrarUnidades();
+            $("#group span").remove("span");
+        });
+        $("#level2").click(function (e) {
+            if ($(this).hasClass("activo1 bg-primary")) $(this).removeClass("activo1 bg-primary");
+            else $(this).addClass("activo1 bg-primary");
+            $("#levelTodos").removeClass("activo1 bg-primary");
+            mostrarUnidades();
+            $("#group span").remove("span");
+        });
+        $("#level3").click(function (e) {
+            if ($(this).hasClass("activo1 bg-primary")) $(this).removeClass("activo1 bg-primary");
+            else $(this).addClass("activo1 bg-primary");
+            $("#levelTodos").removeClass("activo1 bg-primary");
+            mostrarUnidades();
+            $("#group span").remove("span");
+        });
+        $("#level4").click(function (e) {
+            if ($(this).hasClass("activo1 bg-primary")) $(this).removeClass("activo1 bg-primary");
+            else $(this).addClass("activo1 bg-primary");
+            $("#levelTodos").removeClass("activo1 bg-primary");
+            mostrarUnidades();
+            $("#group span").remove("span");
+        });
+    });
+
+    function actualizaZonaSector(elem) {
+        $("span").remove("#span_" + elem);
+        $("#" + elem).show();
+    }
+
+    function mostrarUnidades() {
+        $(".unidad").each(function (index) {
+            if ($(this).attr('nivel') == '0') if ($("#level0").hasClass("activo1 bg-primary")) { $(this).show(); $(this).parent().parent().show(); $(this).parent().parent().parent().parent().show();} else { $(this).hide(); }
+            if ($(this).attr('nivel') == '1') if ($("#level1").hasClass("activo1 bg-primary")) { $(this).show(); $(this).parent().parent().show(); $(this).parent().parent().parent().parent().show();} else { $(this).hide(); }
+            if ($(this).attr('nivel') == '2') if ($("#level2").hasClass("activo1 bg-primary")) { $(this).show(); $(this).parent().parent().show(); $(this).parent().parent().parent().parent().show();} else { $(this).hide(); }
+            if ($(this).attr('nivel') == '3') if ($("#level3").hasClass("activo1 bg-primary")) { $(this).show(); $(this).parent().parent().show(); $(this).parent().parent().parent().parent().show();} else { $(this).hide(); }
+            if ($(this).attr('nivel') == '4') if ($("#level4").hasClass("activo1 bg-primary")) { $(this).show(); $(this).parent().parent().show(); $(this).parent().parent().parent().parent().show();} else { $(this).hide(); }
+        });
+        $(".parentSector").each(function (index) {
+            if ($(this).find("ul li span:visible").length == 0) { $(this).hide();}
+        });
+        $(".parentZona").each(function (index) {
+            if ($(this).find("ul li span:visible").length == 0) { $(this).hide();}
+        });
+    }
+
+    function ajaxByUnitId(id) {
+        $("#NoUnitSelected").css("display", "none");
+        if ($("#tipoAlarmas").hasClass("activo1 bg-primary")) { ajaxAlarmasByUnitId(id); }
+        else { ajaxOperacionesByUnitId(id); }
+        $(".unitSelected").removeClass("unitSelected");
+        $("#unidad_" + id + " span").addClass('unitSelected');
+    }
+    function ajaxAlarmasByUnitId(id) {
+        $('#gridOperaciones').hide();
+        $('#gridAlarmas').fadeIn();
+        $('body').css("cursor", "wait");
+        $('.unidad span').css("cursor", "wait");
+        $('#grid').css("opacity", "0.1");
+        $.ajax({
+            type: 'GET',
+            url: "/Trabajo/InstalacionAlarmas/" + id,
+            //dataType: "json",
+            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+            //data: jQuery.param({ 'id': id }),
+            success: function (data) {
+                //$("#grid").html(data);
+                if ($('#gridAlarmas table tr th a').first().length != 0) {
+                    var dir = $('#gridAlarmas table tr th a').first()[0].href;
+                    $('#gridAlarmas table tr th a').first()[0].href = "/Trabajo/InstalacionAlarmas/" + id;
+                    $('#gridAlarmas table tr th a').first()[0].click();
+                    $('#gridAlarmas table tr th a').first()[0].href = dir;
+                }
+                $('.unidad span').css("cursor", "pointer");
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(id + " - " + xhr.status);
+                alert(thrownError);
+            }
+        });
+    }
+    function ajaxOperacionesByUnitId(id) {
+        $('#gridAlarmas').hide();
+        $('#gridOperaciones').fadeIn();
+        $('body').css("cursor", "wait");
+        $('.unidad span').css("cursor", "wait");
+        $('#grid').css("opacity", "0.1");
+        $.ajax({
+            type: 'GET',
+            url: "/Trabajo/InstalacionOperaciones/" + id,
+            //dataType: "json",
+            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+            //data: jQuery.param({ 'id': id }),
+            success: function (data) {
+                //$("#grid").html(data);
+                if ($('#gridOperaciones table tr th a').first().length != 0) {
+                    var dir = $('#gridOperaciones table tr th a').first()[0].href;
+                    $('#gridOperaciones table tr th a').first()[0].href = "/Trabajo/InstalacionOperaciones/" + id;
+                    $('#gridOperaciones table tr th a').first()[0].click();
+                    $('#gridOperaciones table tr th a').first()[0].href = dir;
+                }
+                $('.unidad span').css("cursor", "pointer");
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(id + " - " + xhr.status);
+                alert(thrownError);
+            }
+        });
+    }
+</script>
+
+<link href="~/Content/estiloTree.css" rel="stylesheet" />
+<style>
+    .parentZona > span, .parentSector > span {
+        background-color: #EEEEEE;
+    }
+    .parentZona {
+        /*background: repeating-linear-gradient( 45deg, rgba(0, 0, 0, 0) 2px, rgba(0, 0, 0, 0) 4px, #DDDDDD 4px, #DDDDDD 6px );*/
+    }
+    .unitSelected {
+        height: 25px;
+        box-shadow: 0.1em 0.2em #888888;
+        background-color: #FFFFFF !important;
+    }
+    #level span:hover, #tipo span:hover, #group span:hover {
+        background-color: #DDDDDD;
+        color: black;
+        cursor: pointer;
+        opacity: 0.9;
+    }
+    .unidad span:hover, .unidad div:hover, .parentZona > span:hover, .parentSector > span:hover {
+        background-color: #FFFFFF;
+        cursor: pointer;
+        opacity: 0.9;
+    }
+    .unidad sup, #level sup {
+        padding: 2px;
+        color: #FFFFFF;
+        border-radius: 50%;
+        background-color: #AA3333;
+    }
+    .unidad div{
+        position:relative;
+        top:-10px;
+    }
+    .tree li {
+        padding-bottom: 0.1em;
+    }
+    #group{
+        height:80px;
+        overflow-y:auto;
+    }
+    #tipo span, #level span, #group span, #unitStatus span {
+        border: solid .1em #666;
+        border-radius: .2em;
+        display: inline-block;
+        padding: .2em .5em;
+        position: relative;
+    }
+    #tipo span, #group span, #unitStatus span {
+        margin: 0 .2em .5em;
+    }
+    #NoUnitSelected{
+        font-weight:bold;
+    }
+    #level span {
+        margin: -.2em;
+    }
+    .statusText{
+        display: none;
+    }
+    .statusColor:hover{
+        cursor: help;
+    }
+    .statusColor:hover + .statusText {
+        display: inline-block;
+    }
+    .status_0 { background-color:#66DD66;}/*ventas*/
+    .status_1 { background-color:#666666;}/*no ventas*/
+    .status_2 { background-color:#DD6666;}/*Fuera de Servicio*/
+    .status_3 { background-color:#CCCCCC;}/*Sin conexión*/
+    .status_6 { background-color:#6666DD;}/*mantenimiento*/
+    .status_7 { background-color:#DD66DD;}/*recaudacion*/
+
+    .alarm_image_0 { background-image:url("../Content/Images/pkmeter_0.png");}/*sin alarmas #33CC33*/
+    .alarm_image_1 { background-image:url("../Content/Images/pkmeter_1.png");}/*con alarmas #CC6600*/
+    .alarm_image_3 { background-image:url("../Content/Images/pkmeter_3.png");}/*con alarmas y alarma 1000 #BBBBBB*/
+</style>
+
+<table id="cabecera">
+    <tr>
+        <td width="35%">
+            <div id="unitStatus">
+                Estados:
+                @foreach (var item in estados)
+                {
+                    <span class="statusColor status_@item.UNI_DSTA_ID">&nbsp;</span><p class="statusText">@item.DSTA_DESCSHORT</p>
+                }
+            </div>
+            <div id="level">
+                Niveles de Alarma (<sup>x</sup>):
+                <span id="levelTodos" class="activo1 bg-primary">Todos</span>
+                <span id="level0">0</span>
+                <span id="level1">1</span>
+                <span id="level2">2</span>
+                <span id="level3">3</span>
+                <span id="level4">4</span>
+            </div>
+        </td>
+        <td width="65%">
+            <div id="group"></div>
+        </td>
+    </tr>
+</table>
+
+
+
+@Html.Raw(lista)
+
+<div id="tipo">
+    <span id="tipoAlarmas" class="activo1 bg-primary">Alarmas</span>
+    <span id="tipoOperaciones">Operaciones</span>
+    <div id="NoUnitSelected">No hay ninguna unidad seleccionada. Seleccione una unidad.</div>
+</div>
+
+<div id="grid">
+    <div id="gridAlarmas">
+        @{
+            if (alarmas == null)
+            {
+                List<opsControlCenter.Models.AlarmasPorUnidad> listVacia = new List<opsControlCenter.Models.AlarmasPorUnidad>();
+                alarmas = listVacia;
+                ViewBag.TotalRowsAlarmas = 0;
+                ViewBag.PageSizeAlarmas = 5;
+            }
+            Html.RenderPartial("AlarmasPorUnidadPartial", alarmas);
+        }
+    </div>
+
+    <div id="gridOperaciones">
+        @{
+            if (operaciones == null)
+            {
+                List<opsControlCenter.Models.OperacionesPorUnidad> listVacia = new List<opsControlCenter.Models.OperacionesPorUnidad>();
+                operaciones = listVacia;
+                ViewBag.TotalRowsOperaciones = 0;
+                ViewBag.PageSizeOperaciones = 5;
+            }
+            Html.RenderPartial("OperacionesPorUnidadPartial", operaciones);
+        }
+    </div>
+</div>
+
+<table class="table table-bordered table-striped" id="UNITS" border="1" style="border-color:black;display:none;">
+    <thead>
+        <tr>
+            <th>idZona</th>
+            <th>zona</th>
+            <th>idSector</th>
+            <th>sector</th>
+            <th>Id</th>
+            <th>Unidad</th>
+            <th>Desc</th>
+            <th>X</th>
+            <th>Y</th>
+            <th>Status</th>
+            <th>idAlarmDef</th>
+            <th>LevelAlarm</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in units)
+        {
+            <tr>
+                <td>@item.idZona</td>
+                <td>@item.zona</td>
+                <td>@item.idSector</td>
+                <td>@item.sector</td>
+                <td>@item.UNI_ID</td>
+                <td>@item.UNI_DESCSHORT</td>
+                <td>@item.UNI_DESCLONG</td>
+                <td>@item.UNI_POSX</td>
+                <td>@item.UNI_POSY</td>
+                <td>@item.DSTA_DESCSHORT</td>
+                <td>@item.DALA_ID</td>
+                <td>@item.DALA_DALV_ID</td>
+            </tr>
+
+        }
+    </tbody>
+</table>

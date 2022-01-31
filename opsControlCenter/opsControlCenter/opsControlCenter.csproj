@@ -205,6 +205,7 @@
     <Compile Include="Models\MyAuthorizeAttribute.cs" />
     <Compile Include="Models\Recaudacion.cs" />
     <Compile Include="Models\ROLES.cs" />
+    <Compile Include="Models\UnidadesInstalacion.cs" />
     <Compile Include="Models\UnidadesMapa.cs" />
     <Compile Include="Models\UNITS.cs" />
     <Compile Include="Models\USERS.cs" />
@@ -218,6 +219,7 @@
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\estiloTree.css" />
     <Content Include="Content\estiloGrid.css" />
     <Content Include="Content\icons\stats\0.png" />
     <Content Include="Content\icons\stats\03.png" />
@@ -295,6 +297,9 @@
     <Content Include="Content\Images\pkmeter_7.png" />
     <Content Include="Content\Images\pkmeter_8.png" />
     <Content Include="Content\Images\pkmeter_9.png" />
+    <Content Include="Content\Images\pk_0.png" />
+    <Content Include="Content\Images\pk_1.png" />
+    <Content Include="Content\Images\pk_3.png" />
     <Content Include="Content\Images\view-fullscreen.png" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
@@ -369,6 +374,7 @@
     <Content Include="Views\Trabajo\AlarmasPorUnidadPartial.cshtml" />
     <Content Include="Views\Trabajo\OperacionesPorUnidadPartial.cshtml" />
     <Content Include="Views\Trabajo\RecaudacionTickets.cshtml" />
+    <Content Include="Views\Trabajo\Instalacion.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

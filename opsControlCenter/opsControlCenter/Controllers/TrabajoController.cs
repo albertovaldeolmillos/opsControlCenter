@@ -13,6 +13,47 @@ namespace opsControlCenter.Controllers
 {
     public class TrabajoController : Controller
     {
+        #region Instalacion
+        public ActionResult Instalacion()
+        {
+            SearchPagingSort searchPagingSort = new SearchPagingSort();
+            List<UnidadesInstalacion> units = searchPagingSort.mapDataSetToModel.MapUnidadesInstalacion();
+            ViewData["UnidadesInstalacion"] = units;
+            return View("Instalacion");
+        }
+
+        public ActionResult InstalacionAlarmas(string id, int page = 1, string sort = "ACTIVE", string sortdir = "asc")
+        {
+            SearchPagingSort searchPagingSort = new SearchPagingSort();
+            int pagesize = 5;
+            int totalRecord = 0;
+            if (page < 1) page = 1;
+            int skip = (page * pagesize) - pagesize;
+            List<AlarmasPorUnidad> alarmas = (id == null) ? new List<AlarmasPorUnidad>() : searchPagingSort.GetAlarmasByUnitId(id, sort, sortdir, skip, pagesize, out totalRecord);
+            ViewData["AlarmasPorUnidad"] = alarmas;
+            ViewBag.TotalRowsAlarmas = totalRecord;
+            ViewBag.Page = page;
+            ViewBag.PageSizeAlarmas = pagesize;
+            return Instalacion();
+        }
+
+        public ActionResult InstalacionOperaciones(string id, int page = 1, string sort = "OPE_MOVDATE", string sortdir = "asc")
+        {
+            SearchPagingSort searchPagingSort = new SearchPagingSort();
+            int pagesize = 5;
+            int totalRecord = 0;
+            if (page < 1) page = 1;
+            int skip = (page * pagesize) - pagesize;
+            List<OperacionesPorUnidad> operaciones = (id == null) ? new List<OperacionesPorUnidad>() : searchPagingSort.GetOperacionesByUnitId(id, sort, sortdir, skip, pagesize, out totalRecord);
+            ViewData["OperacionesPorUnidad"] = operaciones;
+            ViewBag.TotalRowsOperaciones = totalRecord;
+            ViewBag.Page = page;
+            ViewBag.PageSizeOperaciones = pagesize;
+            return Instalacion();
+        }
+
+        #endregion
+
         #region Mapa
         public ActionResult Mapa()
         {
@@ -73,6 +114,11 @@ namespace opsControlCenter.Controllers
             var list = JsonConvert.SerializeObject(data);
             return Json(data);
         }
+
+        #endregion
+
+        #region Denuncias
+
 
         #endregion
 
@@ -239,7 +285,7 @@ namespace opsControlCenter.Controllers
         public ActionResult Recaudacion(int page = 1, string sort = "COL_ID", string sortdir = "asc")
         {
             FormCollection formCollection = (FormCollection)Session["formCollectionRecaudacion"];
-            int pagesize = Int32.Parse(ConfigurationManager.AppSettings["pagesize"]);
+            int pagesize = Int32.Parse(ConfigurationManager.AppSettings["pagesize2"]);
             int totalRecord = 0;
             if (page < 1) page = 1;
             int skip = (page * pagesize) - pagesize;

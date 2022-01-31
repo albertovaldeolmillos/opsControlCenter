@@ -127,6 +127,7 @@
         tabla2 = tabla2 + "<tr><td>AP:     " + DosDecimales(0.01 * data['COL_CRCARD_PARK']) + "      " + data['COL_CRCARD_PARK_OPS'] + "</td></tr>";
         tabla2 = tabla2 + "<tr><td>MULTA:     " + DosDecimales(0.01 * data['COL_CRCARD_FINE']) + "      " + data['COL_CRCARD_FINE_OPS'] + "</td></tr>";
         tabla2 = tabla2 + "<tr><td>RECR:     " + DosDecimales(0.01 * data['COL_CRCARD_RECHARGE']) + "      " + data['COL_CRCARD_RECHARGE_OPS'] + "</td></tr>";
+        tabla2 = tabla2 + "</table>";
         return tabla2;
     }
     function calculaTablaImpresion(data) {

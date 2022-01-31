@@ -112,8 +112,9 @@
                     grid.Column(columnName: "DALA_DESCSHORT", header: "Tipo", style: "selectColLargo", format:@<text><div id="divTipo_@item.ALA_ID" onclick="selectAlarmsDef($(this).text());" class="editable-select-alarmsDef" data-id="@item.ALA_ID" data-parametro="ALA_DALA_ID" data-original="@item.ALA_DALA_ID">@item.DALA_DESCSHORT</div></text>),
                     grid.Column(columnName: "UNI_DESCSHORT", header: "Unidad", style: "selectCol", format:@<text><div id="divUnidad_@item.ALA_ID" onclick="selectUnits($(this).text());" class="editable-select-units" data-id="@item.ALA_ID" data-parametro="ALA_UNI_ID" data-original="@item.ALA_UNI_ID">@item.UNI_DESCSHORT</div></text>),
                     //grid.Column(columnName: "ALA_INIDATE", header: "Inicio", format:@<text><div id ="div_inicio_@item.ALA_ID" onclick="detalle(@item.ALA_ID,'@item.ALA_INIDATE');" class="editable-datepicker" data-id="@item.ALA_ID" data-parametro="Inicio" data-original="@item.ALA_INIDATE">@item.ALA_INIDATE</div></text>)
-                    grid.Column(columnName: "ALA_INIDATE", header: "Inicio", style: "datetimeCol", format:@<text><table><tr><td><span id="spanDateInicio_@item.ALA_ID" class="editable-datepicker" data-id="@item.ALA_ID" data-parametro="ALA_INIDATE" data-original="@item.ALA_INIDATE.ToString("dd/MM/yyyy HH:mm:ss")">@item.ALA_INIDATE.ToString("dd/MM/yyyy")</span></td><td>&nbsp;</td><td><span id="spanTimeInicio_@item.ALA_ID" class="editable-timepicker" data-id="@item.ALA_ID" data-parametro="ALA_INIDATE" data-original="@item.ALA_INIDATE.ToString("dd/MM/yyyy HH:mm:ss")">@item.ALA_INIDATE.ToString("HH:mm:ss")</span></td></tr></table></text>)
-                    //grid.Column(columnName: "ALA_INIDATE", header: "Inicio", format:@<text><input id ="input_inicio_@item.ALA_ID" value="@item.ALA_INIDATE.ToString("yyyy-MM-ddTHH:mm:ss")" type="datetime-local" /><input type="button" onclick="detalle(@item.ALA_ID,'@item.ALA_INIDATE.ToString("yyyy-MM-ddTHH:mm:ss")');" /></text>)
+                    grid.Column(columnName: "ALA_INIDATE", header: "Inicio", style: "datetimeCol", format:@<text><table><tr><td><span id="spanDateInicio_@item.ALA_ID" class="editable-datepicker" data-id="@item.ALA_ID" data-parametro="ALA_INIDATE" data-original="@item.ALA_INIDATE.ToString("dd/MM/yyyy HH:mm:ss")">@item.ALA_INIDATE.ToString("dd/MM/yyyy")</span></td><td>&nbsp;</td><td><span id="spanTimeInicio_@item.ALA_ID" class="editable-timepicker" data-id="@item.ALA_ID" data-parametro="ALA_INIDATE" data-original="@item.ALA_INIDATE.ToString("dd/MM/yyyy HH:mm:ss")">@item.ALA_INIDATE.ToString("HH:mm:ss")</span></td></tr></table></text>),
+                    //grid.Column(columnName: "ALA_INIDATE", header: "Inicio", format:@<text><input id ="input_inicio_@item.ALA_ID" value="@item.ALA_INIDATE.ToString("yyyy-MM-ddTHH:mm:ss")" type="datetime-local" /><input type="button" onclick="detalle(@item.ALA_ID,'@item.ALA_INIDATE.ToString("yyyy-MM-ddTHH:mm:ss")');" /></text>),
+                    grid.Column(columnName: "DALA_DALV_ID", header: "Nivel", format:@<text><div>@item.DALA_DALV_ID</div></text>)
                     )
                 )
             }
@@ -129,7 +130,8 @@
                     grid.Column(columnName: "ALA_ID", header: "Id", format:@<text><div>@item.ALA_ID</div></text>),
                     grid.Column(columnName: "DALA_DESCSHORT", header: "Tipo", format:@<text><div>@item.Tipo</div></text>),
                     grid.Column(columnName: "UNI_DESCSHORT", header: "Unidad", format:@<text><div>@item.Unidad</div></text>),
-                    grid.Column(columnName: "ALA_INIDATE", header: "Inicio", format:@<text><div>@item.ALA_INIDATE</div></text>)
+                    grid.Column(columnName: "ALA_INIDATE", header: "Inicio", format:@<text><div>@item.ALA_INIDATE</div></text>),
+                    grid.Column(columnName: "DALA_DALV_ID", header: "Nivel", format:@<text><div>@item.DALA_DALV_ID</div></text>)
                     )
                 )
             }

@@ -97,6 +97,11 @@ namespace opsControlCenter.Helpers
         {
             return configMapper<UnidadesMapa>();
         }
+
+        public MapperConfiguration configUnidadesInstalacion()
+        {
+            return configMapper<UnidadesInstalacion>();
+        }
         #endregion
 
         #region Recaudacion

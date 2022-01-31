@@ -16,6 +16,22 @@
 <script src="~/Scripts/inlineGrid.js"></script>
 <link href="~/Scripts/jquery-ui.min.css" rel="stylesheet" />
 
+<style>
+    #tableCollecting table table tr td {
+        border: solid 2px #C0C0C0;
+        padding: 2px;
+    }
+    #tableCollecting table table tr th {
+        border: solid 2px #C0C0C0;
+        padding: 2px;
+        color: #606060;
+        background-color: #F0F0F0;
+    }
+    #tableCollecting table table{
+        margin-right:10px;
+    }
+</style>
+
 <script>
 
     $(document).ready(function () {
@@ -31,7 +47,7 @@
             inlineEditGrid("/Trabajo/RecaudacionUpdateParam");
             ajaxDataSelect("/Trabajo/UnitsJSON/", "/Trabajo/RecaudacionUpdateSelectParam/", ".editable-select-units", dataTransformUnits);
         });
-        
+        $("#tableCollecting").hide();
     }
     function dataTransformUnits(data, selected) {
         var res = '';
@@ -45,6 +61,140 @@
     function limpiar() { $('#searchBarId form').find('input:text, input:password, input:file, select, textarea').val(''); }
     function pdf() { this.location.href = "/Trabajo/RecaudacionPDF?sort=" + $('#col').val() + "&sortdir=" + $('#dir').val() }
     function excel() { this.location.href = "/Trabajo/RecaudacionXLS?sort=" + $('#col').val() + "&sortdir=" + $('#dir').val() }
+
+    function populateCollecting(colId) {
+        //var colId = $("#collectings").val();
+        $.ajax({
+            type: 'POST',
+            url: "/Trabajo/CollectingnByColIdJSON/",
+            data: { "colId": colId },
+            success: function (data) {
+                calculaTablaImpresion(data);
+                //para obtener toda la información directamente del data y listarla por los nombres de campos y su valor
+                //calculaTabla(data);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        });
+    }
+    function calculaTabla(data) {
+        var tabla = "<table><tr>";
+        for (var i = 0; i < Object.keys(data).length; i++) {
+            tabla = tabla + "<td>" + Object.keys(data)[i] + "</td>";
+        }
+        tabla = tabla + "</tr></tr>";
+        for (var i = 0; i < Object.keys(data).length; i++) {
+            var valor = data[Object.keys(data)[i]];
+            if (Object.keys(data)[i] == "COL_DATE" || Object.keys(data)[i] == "COL_INIDATE" || Object.keys(data)[i] == "COL_ENDDATE") {
+                valor = obtenerFecha(valor);
+            }
+            tabla = tabla + "<td>" + valor + "</td>";
+        }
+        tabla = tabla + "</tr></table>";
+        $("#tableCollecting").html(tabla);
+        $("#tableCollecting").show();
+    }
+    function calculaTabla1(data) {
+        var tabla1 = "<table>";
+        tabla1 = tabla1 + "<tr><th colspan=3>MONEDAS: " + data['COL_CASH_TOTAL_OPS'] + "</th></tr>";
+        tabla1 = tabla1 + "<tr><th>#MON</th><th>TIPO</th><th>TOTAL</th></tr>";
+        for (var i = 0; i < Object.keys(data).length; i++) {
+            if (Object.keys(data)[i].indexOf("COL_CASH_COINS_Q") >= 0 && data[Object.keys(data)[i]] > 0) {
+                tabla1 = tabla1 + "<tr><td>" + data[Object.keys(data)[i]] + "</td><td>" + DosDecimales(0.01 * (data[Object.keys(data)[i - 1]])) + "</td><td>" + DosDecimales((data[Object.keys(data)[i]]) * 0.01 * (data[Object.keys(data)[i - 1]])) + "</td></tr>";
+            }
+        }
+        tabla1 = tabla1 + "<tr><th colspan=3>TOTAL: " + DosDecimales(0.01 * data['COL_CASH_TOTAL']) + "  " + data['COL_COIN_SYMBOL'] + "</th></tr>";
+        tabla1 = tabla1 + "<tr><th colspan=3>HIST: " + DosDecimales(0.01 * data['COL_BACK_COL_TOTAL']) + "  " + data['COL_COIN_SYMBOL'] + "</th></tr>";
+        tabla1 = tabla1 + "</table>";
+        return tabla1;
+    }
+    function calculaTabla2(data) {
+        var tabla2 = "<table>";
+        tabla2 = tabla2 + "<tr><th>TICKETS</th><th>TARIFA</th></tr>";
+        for (var i = 0; i < Object.keys(data).length; i++) {
+            if (Object.keys(data)[i].indexOf("COL_CMI_") >= 0) {
+                //var tipo = Object.keys(data)[i].split("_")[2];
+                var tipo = "";
+                if (Object.keys(data)[i] == "COL_CMI_050") tipo = "0,50"; if (Object.keys(data)[i] == "COL_CMI_050_075") tipo = "0,75";
+                if (Object.keys(data)[i] == "COL_CMI_075_100") tipo = "1,00"; if (Object.keys(data)[i] == "COL_CMI_100_075") tipo = "1,50";
+                if (Object.keys(data)[i] == "COL_CMI_150_075") tipo = "2,00"; if (Object.keys(data)[i] == "COL_CMI_200_075") tipo = "2,50";
+                if (Object.keys(data)[i] == "COL_CMI_250_075") tipo = "3,00"; if (Object.keys(data)[i] == "COL_CMI_300_075") tipo = "4,00";
+                if (Object.keys(data)[i] == "COL_CMI_400_075") tipo = "5,00"; if (Object.keys(data)[i] == "COL_CMI_500") tipo = ">5,00";
+                tabla2 = tabla2 + "<tr><td>" + data[Object.keys(data)[i]] + "</td><td>" + tipo + "</td></tr>";
+            }
+        }
+        tabla2 = tabla2 + "</table>";
+        return tabla2;
+    }
+    function calculaTabla3(data) {
+        var tabla3 = "<table>";
+        tabla3 = tabla3 + "<tr><th>TICKETS</th><th>HORARIO</th></tr>";
+        for (var i = 0; i < Object.keys(data).length; i++) {
+            if (Object.keys(data)[i].indexOf("COL_CTI_") >= 0) {
+                var tipo = "";
+                var tipoArr = Object.keys(data)[i].split("_");
+                if (tipoArr.length == 4) tipo = tipoArr[3]; else tipo = tipoArr[2];
+                tipo = tipo.substring(0, 2) + ":" + tipo.substring(2, tipo.length);
+                tabla3 = tabla3 + "<tr><td>" + data[Object.keys(data)[i]] + "</td><td>" + tipo + "</td></tr>";
+            }
+        }
+        tabla3 = tabla3 + "</table>";
+        return tabla3;
+    }
+    function calculaTabla4(data) {
+        var tabla4 = "<table>";
+        tabla4 = tabla4 + "<tr><th colspan=3>TICKETS X MONEDAS</th></tr>";
+        tabla4 = tabla4 + "<tr><th></th><th>IMPORTE</th><th>#OPS</th></tr>";
+        tabla4 = tabla4 + "<tr><td>AP</td><td>" + DosDecimales(0.01 * data['COL_CASH_PARK']) + "</td><td>" + data['COL_CASH_PARK_OPS'] + "</td></tr>";
+        tabla4 = tabla4 + "<tr><td>MULTA</td><td>" + DosDecimales(0.01 * data['COL_CASH_FINE']) + "</td><td>" + data['COL_CASH_FINE_OPS'] + "</td></tr>";
+        tabla4 = tabla4 + "<tr><td>RECR</td><td>" + DosDecimales(0.01 * data['COL_CASH_RECHARGE']) + "</td><td>" + data['COL_CASH_RECHARGE_OPS'] + "</td></tr>";
+        tabla4 = tabla4 + "</table>";
+        return tabla4;
+    }
+    function calculaTabla5(data) {
+        var tabla5 = "<table>";
+        tabla5 = tabla5 + "<tr><th colspan=3>TICKETS X TARJ. CHIP</th></tr>";
+        tabla5 = tabla5 + "<tr><th></th><th>IMPORTE</th><th>#OPS</th></tr>";
+        tabla5 = tabla5 + "<tr><td>AP</td><td>" + DosDecimales(0.01 * data['COL_CHCARD_PARK']) + "</td><td>" + data['COL_CHCARD_PARK_OPS'] + "</td></tr>";
+        tabla5 = tabla5 + "<tr><td>MULTA</td><td>" + DosDecimales(0.01 * data['COL_CHCARD_FINE']) + "</td><td>" + data['COL_CHCARD_FINE_OPS'] + "</td></tr>";
+        tabla5 = tabla5 + "<tr><td>DEV</td><td>" + DosDecimales(0.01 * data['COL_CHCARD_RETURN']) + "</td><td>" + data['COL_CHCARD_RETURN_OPS'] + "</td></tr>";
+        tabla5 = tabla5 + "</table>";
+        return tabla5;
+    }
+    function calculaTabla6(data) {
+        var tabla6 = "<table>";
+        tabla6 = tabla6 + "<tr><th colspan=3>TICKETS X TARJ. CRÉDITO</th></tr>";
+        tabla6 = tabla6 + "<tr><th></th><th>IMPORTE</th><th>#OPS</th></tr>";
+        tabla6 = tabla6 + "<tr><td>AP</td><td>" + DosDecimales(0.01 * data['COL_CRCARD_PARK']) + "</td><td>" + data['COL_CRCARD_PARK_OPS'] + "</td></tr>";
+        tabla6 = tabla6 + "<tr><td>MULTA</td><td>" + DosDecimales(0.01 * data['COL_CRCARD_FINE']) + "</td><td>" + data['COL_CRCARD_FINE_OPS'] + "</td></tr>";
+        tabla6 = tabla6 + "<tr><td>RECR</td><td>" + DosDecimales(0.01 * data['COL_CRCARD_RECHARGE']) + "</td><td>" + data['COL_CRCARD_RECHARGE_OPS'] + "</td></tr>";
+        tabla6 = tabla6 + "</table>";
+        return tabla6;
+    }
+    function calculaTablaImpresion(data) {
+        var tabla = "<table id='tablePrint'>";
+        tabla = tabla + "<tr><td>" + calculaTabla1(data) + "</td><td>" + calculaTabla2(data) + "</td><td>" + calculaTabla3(data) + "</td><td>" + calculaTabla4(data) + "</td><td>" + calculaTabla5(data) + "</td><td>" + calculaTabla6(data) + "</td></tr>";
+        tabla = tabla + "</table>";
+        $("#tableCollecting").html(tabla);
+        $("#tableCollecting").show();
+    }
+    function DosDecimales(num) {
+        return (Math.round(num * 100) / 100).toFixed(2);
+    }
+    function obtenerFecha(fecha) {
+        var pattern = /Date\(([^)]+)\)/;
+        var resultsIni = pattern.exec(fecha);
+        var dtIni = new Date(parseFloat(resultsIni[1]));
+        var fechaIni = PoneCeros(dtIni.getDate()) + "/" + PoneCeros(dtIni.getMonth() + 1) + "/" + dtIni.getFullYear() + " " + PoneCeros(dtIni.getHours()) + ":" + PoneCeros(dtIni.getMinutes()) + ":" + PoneCeros(dtIni.getSeconds());
+        return fechaIni;
+    }
+    function PoneCeros(elem) {
+        elem = parseInt(elem);
+        if (elem < 10) elem = "0" + elem;
+        return elem;
+    }
 
 </script>
 
@@ -92,8 +242,9 @@
             grid.Column(columnName: "COL_DATE", header: "Fecha", format:@<text><div>@item.COL_DATE</div></text>),
             grid.Column(columnName: "COL_INIDATE", header: "Inicio", format:@<text><div>@item.COL_INIDATE</div></text>),
             grid.Column(columnName: "COL_ENDDATE", header: "Fin", format:@<text><div>@item.COL_ENDDATE</div></text>),
-            grid.Column(columnName: "COL_BACK_COL_TOTAL", header: "Total", format:@<text><div>@item.COL_BACK_COL_TOTAL</div></text>),
-            grid.Column(columnName: "COL_COIN_SYMBOL", header: "Moneda", style: "textCol", format:@<text><div id="divMoneda_@item.COL_ID" class="editable-text" data-id="@item.COL_ID" data-parametro="COL_COIN_SYMBOL" data-original="@item.COL_COIN_SYMBOL">@item.COL_COIN_SYMBOL</div></text>)
+            grid.Column(columnName: "COL_BACK_COL_TOTAL", header: "Total", format:@<text>@{double total = 0.01 * decimal.ToDouble(item.COL_BACK_COL_TOTAL);}<div>@total</div></text>),
+            grid.Column(columnName: "COL_COIN_SYMBOL", header: "Moneda", style: "textCol", format:@<text><div id="divMoneda_@item.COL_ID" class="editable-text" data-id="@item.COL_ID" data-parametro="COL_COIN_SYMBOL" data-original="@item.COL_COIN_SYMBOL">@item.COL_COIN_SYMBOL</div></text>),
+            grid.Column(columnName: "Detalle", header: "Detalle", format:@<text><button type="button" onclick="populateCollecting(@item.COL_ID)" class="btn btn-primary btn-sm glyphicon glyphicon-list-alt" style="padding: 0px 5px;"></button></text>)
             )
         )
         @{ 
@@ -109,6 +260,7 @@
         @Html.Hidden("dir", sortDirection)
         @Html.Hidden("col", sortColumn)
     </div>
+    <div id="tableCollecting" style="display:none;overflow:auto;"></div>
 
     <script>
         function selectUnits(selected) {
