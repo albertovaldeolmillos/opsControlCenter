@@ -57,7 +57,7 @@
         }
         return '{' + res + '"selected": "' + selected + '"}';
     }
-    function filtrar() { ajaxFilter('/Trabajo/RecaudacionFilter', '/Trabajo/Recaudacion', $('#searchBarId form').serialize()); }
+    function filtrar() { ajaxFilter('/Trabajo/RecaudacionFilter', '/Trabajo/Recaudacion', $('#searchBarId form').serialize()); $('#grid').css("opacity", "0.3");}
     function limpiar() { $('#searchBarId form').find('input:text, input:password, input:file, select, textarea').val(''); }
     function pdf() { this.location.href = "/Trabajo/RecaudacionPDF?sort=" + $('#col').val() + "&sortdir=" + $('#dir').val() }
     function excel() { this.location.href = "/Trabajo/RecaudacionXLS?sort=" + $('#col').val() + "&sortdir=" + $('#dir').val() }
@@ -249,7 +249,7 @@
         )
         @{ 
             var sortDirection = "ASC"; if (grid.SortDirection == SortDirection.Descending) { sortDirection = "DESC"; };
-            var sortColumn = ""; if (grid.SortColumn != "undefined" && grid.SortColumn != "") { sortColumn = grid.SortColumn; };
+            var sortColumn = "COL_ID"; if (grid.SortColumn != "undefined" && grid.SortColumn != "") { sortColumn = grid.SortColumn; };
         }
         <div class="text-right">
             <button type="button" value="XLS" style="padding:6px;" class="btn btn-primary" onclick="excel();">XLS</button>

@@ -43,6 +43,36 @@ namespace opsControlCenter.Helpers
             return ds;
         }
 
+        public DataSet GetDataSet(string strSQL)
+        {
+            string oradb = ConfigurationManager.AppSettings["OracleDataAccess"];
+            DataSet ds = new DataSet();
+
+            using (OracleConnection con = new OracleConnection(oradb))
+            {
+                using (OracleCommand cmd = con.CreateCommand())
+                {
+                    try
+                    {
+                        con.Open();
+                        cmd.CommandText = strSQL;
+                        OracleDataAdapter oDa = new OracleDataAdapter(cmd);
+
+                        oDa.Fill(ds);
+
+                        con.Close(); ;
+                        //ViewBag.Message = strModel + " lista:";
+                    }
+                    catch (Exception ex)
+                    {
+                        //ViewBag.Message = "page." + "error:" + ex.Message;
+                    }
+                }
+            }
+
+            return ds;
+        }
+
         public void UpdateTableParam(string table, string param, string paramValue, string id, string idvalue)
         {
             string strMunicipio = ConfigurationManager.AppSettings["OPSMunicipio"];

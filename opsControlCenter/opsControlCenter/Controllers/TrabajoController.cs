@@ -118,7 +118,123 @@ namespace opsControlCenter.Controllers
         #endregion
 
         #region Denuncias
+        public ActionResult Denuncias(int page = 1, string sort = "FIN_ID", string sortdir = "asc")
+        {
+            FormCollection formCollection = (FormCollection)Session["formCollectionDenuncias"];
+            int pagesize = Int32.Parse(ConfigurationManager.AppSettings["pagesize"]);
+            int totalRecord = 0;
+            if (page < 1) page = 1;
+            int skip = (page * pagesize) - pagesize;
+            //if (formCollection == null)
+            //{
+            //    formCollection = new FormCollection();
+            //    formCollection.Add("search_FIN_DATE", "01/01/2021 - 01/01/2022");
+            //}
+            SearchPagingSort searchPagingSort = new SearchPagingSort();
+            //var data = searchPagingSort.GetDenuncias(formCollection, sort, sortdir, skip, pagesize, out totalRecord);
 
+            int anio = DateTime.Now.Year;
+            if (formCollection != null)
+            {
+                anio = Int32.Parse(formCollection["search_ANIO"].ToString());    
+            }
+            else
+            {
+                MapDataSetToModel mapDataSetToModel = new MapDataSetToModel();
+                List<int> anios = mapDataSetToModel.MapAniosDenuncias();
+                anio = anios.Max();
+            }
+            var data = searchPagingSort.GetDenunciasAnio(anio,formCollection, sort, sortdir, skip, pagesize, out totalRecord);
+            ViewBag.TotalRows = totalRecord;
+            ViewBag.Search = formCollection;
+            ViewBag.Page = page;
+            ViewBag.PageSize = pagesize;
+            ViewData["USR_LOGIN"] = User.Identity.Name;
+
+            return View(data);
+        }
+
+        [HttpPost]
+        public ActionResult DenunciasFilter(FormCollection formCollection = null)
+        {
+            Session["formCollectionDenuncias"] = formCollection;
+            return RedirectToAction("Denuncias");
+        }
+
+        /// <summary>
+        /// Permite actualizar los campos de tipo texto de FINES
+        /// </summary>
+        /// <param name="id">id de la PK de la tabla actual (id registro actual) (FIN_ID, ...)</param>
+        /// <param name="param">nombre del campo</param>
+        /// <param name="original">valor original</param>
+        /// <param name="value">valor obtenido</param>
+        /// <returns>se devuelve el valor a mostrar</returns>
+        [HttpPost]
+        public ActionResult DenunciaUpdateParam(int id = 1, string param = "", string original = "", string value = "")
+        {
+            string valueActual = "'" + value + "'";
+
+            //aquí se guardaría en la BDs el parametro
+            DataSetObject dataSetObject = new DataSetObject();
+            dataSetObject.UpdateTableParam("FINES", param, valueActual, "FIN_ID", id.ToString());
+
+            return Content(value);
+        }
+
+        [HttpPost]
+        public ActionResult FineUpdateSelectParam(int id = 1, string param = "", string original = "", string value = "")
+        {
+            var splitValue = value.Split(new[] { "___" }, StringSplitOptions.None);
+
+            //aquí se guardaría en la BDs el parametro
+            //update FINE set param = splitValue[0] where FIN_ID = id
+
+            return Content(splitValue[1]);
+        }
+
+        public ActionResult DenunciasPDF(int anio, string sort = "FIN_ID", string sortdir = "asc")
+        {
+            FormCollection formCollection = (FormCollection)Session["formCollectionDenuncias"];
+            int totalRecord = 0;
+            SearchPagingSort searchPagingSort = new SearchPagingSort();
+            var data = searchPagingSort.GetDenunciasAnio(anio,formCollection, sort, sortdir, 0, 0, out totalRecord);
+
+            //Es necesario crear una PartialView para mostrar los campos que deseamos
+            return new Rotativa.MVC.PartialViewAsPdf("DenunciasPartialPDF", data)
+            {
+                FileName = "Denuncias.pdf"
+            };
+        }
+
+        public ActionResult DenunciasXLS(int anio, string sort = "FIN_ID", string sortdir = "asc")
+        {
+            FormCollection formCollection = (FormCollection)Session["formCollectionDenuncias"];
+            int totalRecord = 0;
+            SearchPagingSort searchPagingSort = new SearchPagingSort();
+            var data = searchPagingSort.GetDenunciasAnio(anio,formCollection, sort, sortdir, 0, 0, out totalRecord);
+
+            DataTable dt = new DataTable();
+            dt.Columns.AddRange(new DataColumn[5] { new DataColumn("Expediente"),
+                                            new DataColumn("Tipo"),
+                                            new DataColumn("Matrícula"),
+                                            new DataColumn("Fecha") ,
+                                            new DataColumn("Calle") });
+            foreach (var elem in data)
+            {
+                dt.Rows.Add(elem.FIN_ID, elem.DFIN_DESCSHORT, elem.FIN_VEHICLEID, elem.FIN_DATE, elem.STR_DESC);
+            }
+
+            using (ClosedXML.Excel.XLWorkbook wb = new ClosedXML.Excel.XLWorkbook())
+            {
+                var ws = wb.Worksheets.Add("Inserting Tables");
+                ws.Cell(1, 1).InsertTable(dt);//si en vez de dt ponemos data devuelve toda la tabla
+                using (System.IO.MemoryStream stream = new System.IO.MemoryStream())
+                {
+                    wb.SaveAs(stream);
+                    return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "DenunciasXLS.xlsx");
+                }
+            }
+        }
 
         #endregion
 
@@ -417,6 +533,46 @@ namespace opsControlCenter.Controllers
             var jsonData = Json(data);
             var list = JsonConvert.SerializeObject(data);
             return Json(data);
+        }
+
+        [HttpPost]
+        public ActionResult FinesDefJSON()
+        {
+            MapDataSetToModel mapDataSetToModel = new MapDataSetToModel();
+            var data = mapDataSetToModel.MapFinesDef();
+            var jsonData = Json(data);
+            var list = JsonConvert.SerializeObject(data);
+            return Json(data);
+        }
+
+        [HttpPost]
+        public ActionResult FinesStatusDefJSON()
+        {
+            MapDataSetToModel mapDataSetToModel = new MapDataSetToModel();
+            var data = mapDataSetToModel.MapFinesStatusDef();
+            var jsonData = Json(data);
+            var list = JsonConvert.SerializeObject(data);
+            return Json(data);
+        }
+
+        [HttpPost]
+        public ActionResult FinesStsadmonDefJSON()
+        {
+            MapDataSetToModel mapDataSetToModel = new MapDataSetToModel();
+            var data = mapDataSetToModel.MapFinesStsadmonDef();
+            var jsonData = Json(data);
+            var list = JsonConvert.SerializeObject(data);
+            return Json(data);
+        }
+
+        [HttpPost]
+        public ActionResult AniosDenunciasJSON()
+        {
+            MapDataSetToModel mapDataSetToModel = new MapDataSetToModel();
+            List<int> anios = mapDataSetToModel.MapAniosDenuncias();
+            var jsonData = Json(anios);
+            var list = JsonConvert.SerializeObject(anios);
+            return Json(anios);
         }
 
         [HttpPost]

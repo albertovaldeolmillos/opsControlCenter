@@ -11,6 +11,7 @@ namespace opsControlCenter.Helpers
     {
         public MapDataSetToModel mapDataSetToModel = new MapDataSetToModel();
         static List<Alarmas> Alarmas { get; set; }
+        static List<Denuncias> Denuncias { get; set; }
         static List<Recaudacion> Recaudacion { get; set; }
         static List<AlarmasPorUnidad> AlarmsHisByUnitId { get; set; }
         static List<OperacionesPorUnidad> OperationsByUnitId { get; set; }
@@ -31,6 +32,54 @@ namespace opsControlCenter.Helpers
             if (sortdir == "ASC" || sortdir == "asc" || sortdir == "Ascending") data = data.OrderBy(x => property.GetValue(x, null)).ToList();
             else data = data.OrderByDescending(x => property.GetValue(x, null)).ToList();
             
+            totalRecord = data.Count;
+            if (pagesize > 0)
+                data = data.Skip(skip).Take(pagesize).ToList();
+
+            return data;
+        }
+
+        public List<Denuncias> GetDenuncias(FormCollection search, string sort, string sortdir, int skip, int pagesize, out int totalRecord)
+        {
+            List<Denuncias> data = new List<Denuncias>();
+            totalRecord = 0;
+
+            if (skip == 0 && sort == "FIN_ID" && sortdir == "asc") Denuncias = mapDataSetToModel.MapDenuncias();
+            data = Denuncias;
+
+            //if (search != "")
+            //    data = data.Where(a => a.DALA_DESCSHORT.Contains(search) || a.UNI_DESCSHORT.Equals(search)).ToList();
+            var properties = typeof(Denuncias).GetProperties();
+            data = Buscar<Denuncias>(properties, search, data);
+
+            var property = typeof(Denuncias).GetProperty(sort);
+            if (sortdir == "ASC" || sortdir == "asc" || sortdir == "Ascending") data = data.OrderBy(x => property.GetValue(x, null)).ToList();
+            else data = data.OrderByDescending(x => property.GetValue(x, null)).ToList();
+
+            totalRecord = data.Count;
+            if (pagesize > 0)
+                data = data.Skip(skip).Take(pagesize).ToList();
+
+            return data;
+        }
+
+        public List<Denuncias> GetDenunciasAnio(int anio, FormCollection search, string sort, string sortdir, int skip, int pagesize, out int totalRecord)
+        {
+            List<Denuncias> data = new List<Denuncias>();
+            totalRecord = 0;
+
+            if (skip == 0 && sort == "FIN_ID" && sortdir == "asc") Denuncias = mapDataSetToModel.MapDenunciasAnio(anio);
+            data = Denuncias;
+
+            //if (search != "")
+            //    data = data.Where(a => a.DALA_DESCSHORT.Contains(search) || a.UNI_DESCSHORT.Equals(search)).ToList();
+            var properties = typeof(Denuncias).GetProperties();
+            data = Buscar<Denuncias>(properties, search, data);
+
+            var property = typeof(Denuncias).GetProperty(sort);
+            if (sortdir == "ASC" || sortdir == "asc" || sortdir == "Ascending") data = data.OrderBy(x => property.GetValue(x, null)).ToList();
+            else data = data.OrderByDescending(x => property.GetValue(x, null)).ToList();
+
             totalRecord = data.Count;
             if (pagesize > 0)
                 data = data.Skip(skip).Take(pagesize).ToList();

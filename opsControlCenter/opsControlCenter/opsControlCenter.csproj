@@ -197,6 +197,12 @@
     <Compile Include="Helpers\MapDataSetToModel.cs" />
     <Compile Include="Helpers\SearchPagingSort.cs" />
     <Compile Include="Models\Alarmas.cs" />
+    <Compile Include="Models\Denuncias.cs" />
+    <Compile Include="Models\FINES.cs" />
+    <Compile Include="Models\FINES_DEF.cs" />
+    <Compile Include="Models\FINES_DEF_QUANTITY.cs" />
+    <Compile Include="Models\FINES_STATUS_DEF.cs" />
+    <Compile Include="Models\FINES_STSADMON_DEF.cs" />
     <Compile Include="Models\OperacionesPorUnidad.cs" />
     <Compile Include="Models\AlarmasPorUnidad.cs" />
     <Compile Include="Models\ALARMS.cs" />
@@ -205,6 +211,7 @@
     <Compile Include="Models\MyAuthorizeAttribute.cs" />
     <Compile Include="Models\Recaudacion.cs" />
     <Compile Include="Models\ROLES.cs" />
+    <Compile Include="Models\STREETS.cs" />
     <Compile Include="Models\UnidadesInstalacion.cs" />
     <Compile Include="Models\UnidadesMapa.cs" />
     <Compile Include="Models\UNITS.cs" />
@@ -375,6 +382,8 @@
     <Content Include="Views\Trabajo\OperacionesPorUnidadPartial.cshtml" />
     <Content Include="Views\Trabajo\RecaudacionTickets.cshtml" />
     <Content Include="Views\Trabajo\Instalacion.cshtml" />
+    <Content Include="Views\Trabajo\Denuncias.cshtml" />
+    <Content Include="Views\Trabajo\DenunciasPartialPDF.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -83,6 +83,13 @@ namespace opsControlCenter.Helpers
 
         #endregion
 
+        #region Denuncias
+        public MapperConfiguration configDenuncias()
+        {
+            return configMapper<Denuncias>();
+        }
+        #endregion
+
         #region Mapa
         public MapperConfiguration configAlarmsByUnitId()
         {
@@ -171,6 +178,32 @@ namespace opsControlCenter.Helpers
         {
             return configMapper<COLLECTINGS>();
         }
+
+        public MapperConfiguration configStreets()
+        {
+            return configMapper<STREETS>();
+        }
+
+        public MapperConfiguration configFinesDef()
+        {
+            return configMapper<FINES_DEF>();
+        }
+
+        public MapperConfiguration configFinesStatusDef()
+        {
+            return configMapper<FINES_STATUS_DEF>();
+        }
+
+        public MapperConfiguration configFinesStsadmonDef()
+        {
+            return configMapper<FINES_STSADMON_DEF>();
+        }
+
+        public MapperConfiguration configFinesDefQuantitys()
+        {
+            return configMapper<FINES_DEF_QUANTITY>();
+        }
+
         #endregion
 
         #region Usuario rol

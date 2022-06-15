@@ -1,0 +1,42 @@
+﻿@model List<opsControlCenter.Models.Denuncias>
+
+    <style>
+        thead {
+            background-color: black;
+            color: white
+        }
+
+        table {
+            border: 1px solid black;
+        }
+
+        td, th {
+            padding: 5px;
+            font-size: 14px;
+        }
+    </style>
+
+    <table class="table table-bordered table-striped" border="1" style="border-color:black">
+        <thead>
+            <tr>
+                <th>Expediente</th>
+                <th>Tipo</th>
+                <th>Matrícula</th>
+                <th>Fecha</th>
+                <th>Calle</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.FIN_ID</td>
+                    <td>@item.DFIN_DESCSHORT</td>
+                    <td>@item.FIN_VEHICLEID</td>
+                    <td>@item.FIN_DATE</td>
+                    <td>@item.STR_DESC</td>
+                </tr>
+
+            }
+        </tbody>
+    </table>

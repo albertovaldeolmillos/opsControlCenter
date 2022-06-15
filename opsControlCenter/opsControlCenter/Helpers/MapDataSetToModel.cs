@@ -49,6 +49,110 @@ namespace opsControlCenter.Helpers
 
         #endregion
 
+        #region Denuncias
+
+        public List<Denuncias> MapDenuncias()
+        {
+            using (DataSetObject dataSetObject = new DataSetObject())
+            {
+                string strModel = "Denuncias";
+                string strSQL = "select fin_id, fin_dfin_id, dfin_descshort, fin_vehicleid,fin_model,fin_manufacturer,fin_colour,fin_str_id,streets.str_desc,fin_strnumber,fin_date,fin_usr_id,users.usr_name," +
+                    "fin_status,fines_status_def.dsfin_descshort,fin_statusadmon,fines_stsadmon_def.dsafin_descshort,fin_uni_id,units.uni_descshort,fin_comments " +
+                    "from " + strMunicipio + ".fines " +
+                    "inner join " + strMunicipio + ".fines_def on fines.fin_dfin_id = fines_def.dfin_id " +
+                    "inner join " + strMunicipio + ".units on fines.fin_uni_id = units.uni_id " +
+                    "inner join " + strMunicipio + ".users on fines.fin_usr_id = users.usr_id " +
+                    "inner join " + strMunicipio + ".streets on fines.fin_str_id = streets.str_id " +
+                    "inner join " + strMunicipio + ".fines_status_def on fines.fin_status = fines_status_def.dsfin_id " +
+                    "inner join " + strMunicipio + ".fines_stsadmon_def on fines.fin_statusadmon = fines_stsadmon_def.dsafin_id ";// +
+                    //"where fin_date >= TO_DATE('2021/01/01', 'YYYY-MM-DD') and fin_date < TO_DATE('2022/01/01', 'YYYY-MM-DD')";
+
+                List<Denuncias> data = new List<Denuncias>();
+                DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
+                if (ds.Tables[strModel].Rows.Count > 0)
+                {
+                    var config = configMapModel.configDenuncias();
+
+                    IMapper iMapper = config.CreateMapper();
+
+                    int cont = 0;
+                    foreach (DataRow row in ds.Tables[strModel].Rows)
+                    {
+                        Denuncias elem = iMapper.Map<DataRow, Denuncias>(ds.Tables[strModel].Rows[cont]);
+                        data.Add(elem);
+                        cont++;
+                    }
+                }
+                return data;
+            }
+
+        }
+
+        public List<Denuncias> MapDenunciasAnio(int anio)
+        {
+            using (DataSetObject dataSetObject = new DataSetObject())
+            {
+                string strModel = "Denuncias";
+                string strSQL = "select fin_id, fin_dfin_id, dfin_descshort, fin_vehicleid,fin_model,fin_manufacturer,fin_colour,fin_str_id,streets.str_desc,fin_strnumber,fin_date,fin_usr_id,users.usr_name," +
+                    "fin_status,fines_status_def.dsfin_descshort,fin_statusadmon,fines_stsadmon_def.dsafin_descshort,fin_uni_id,units.uni_descshort,fin_comments " +
+                    "from " + strMunicipio + ".fines " +
+                    "inner join " + strMunicipio + ".fines_def on fines.fin_dfin_id = fines_def.dfin_id " +
+                    "inner join " + strMunicipio + ".units on fines.fin_uni_id = units.uni_id " +
+                    "inner join " + strMunicipio + ".users on fines.fin_usr_id = users.usr_id " +
+                    "inner join " + strMunicipio + ".streets on fines.fin_str_id = streets.str_id " +
+                    "inner join " + strMunicipio + ".fines_status_def on fines.fin_status = fines_status_def.dsfin_id " +
+                    "inner join " + strMunicipio + ".fines_stsadmon_def on fines.fin_statusadmon = fines_stsadmon_def.dsafin_id " +
+                    "where fin_date >= TO_DATE('" + anio + "/01/01', 'YYYY-MM-DD') and fin_date < TO_DATE('" + (anio + 1) + "/01/01', 'YYYY-MM-DD')";
+
+                List<Denuncias> data = new List<Denuncias>();
+                DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
+                if (ds.Tables[strModel].Rows.Count > 0)
+                {
+                    var config = configMapModel.configDenuncias();
+
+                    IMapper iMapper = config.CreateMapper();
+
+                    int cont = 0;
+                    foreach (DataRow row in ds.Tables[strModel].Rows)
+                    {
+                        Denuncias elem = iMapper.Map<DataRow, Denuncias>(ds.Tables[strModel].Rows[cont]);
+                        data.Add(elem);
+                        cont++;
+                    }
+                }
+                return data;
+            }
+
+        }
+
+        public List<int> MapAniosDenuncias()
+        {
+            using (DataSetObject dataSetObject = new DataSetObject())
+            {
+                string strSQL = "select distinct EXTRACT(year FROM f.fin_date) as year from opssoriatest.fines f order by year desc";
+
+                List<int> data = new List<int>();
+                DataSet ds = dataSetObject.GetDataSet(strSQL);
+                if (ds.Tables[0].Rows.Count > 0)
+                {
+                    var config = configMapModel.configDenuncias();
+
+                    IMapper iMapper = config.CreateMapper();
+
+                    int cont = 0;
+                    foreach (DataRow row in ds.Tables[0].Rows)
+                    {
+                        data.Add(Int32.Parse(row[0].ToString()));
+                        cont++;
+                    }
+                }
+                return data;
+            }
+
+        }
+
+        #endregion
+
         #region Recaudacion
 
         public List<Recaudacion> MapRecaudacion()
@@ -244,6 +348,114 @@ namespace opsControlCenter.Helpers
             }
         }
 
+        public List<STREETS> MapStreets()
+        {
+            using (DataSetObject dataSetObject = new DataSetObject())
+            {
+                string strModel = "STREETS";
+                string strSQL = "select * from " + strMunicipio + ".STREETS";
+
+                List<STREETS> data = new List<STREETS>();
+                DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
+                if (ds.Tables[strModel].Rows.Count > 0)
+                {
+                    var config = configMapModel.configStreets();
+
+                    IMapper iMapper = config.CreateMapper();
+
+                    int cont = 0;
+                    foreach (DataRow row in ds.Tables[strModel].Rows)
+                    {
+                        STREETS elem = iMapper.Map<DataRow, STREETS>(ds.Tables[strModel].Rows[cont]);
+                        data.Add(elem);
+                        cont++;
+                    }
+                }
+                return data;
+            }
+        }
+
+        public List<FINES_DEF> MapFinesDef()
+        {
+            using (DataSetObject dataSetObject = new DataSetObject())
+            {
+                string strModel = "FINES_DEF";
+                string strSQL = "select * from " + strMunicipio + ".FINES_DEF";
+
+                List<FINES_DEF> data = new List<FINES_DEF>();
+                DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
+                if (ds.Tables[strModel].Rows.Count > 0)
+                {
+                    var config = configMapModel.configFinesDef();
+
+                    IMapper iMapper = config.CreateMapper();
+
+                    int cont = 0;
+                    foreach (DataRow row in ds.Tables[strModel].Rows)
+                    {
+                        FINES_DEF elem = iMapper.Map<DataRow, FINES_DEF>(ds.Tables[strModel].Rows[cont]);
+                        data.Add(elem);
+                        cont++;
+                    }
+                }
+                return data;
+            }
+        }
+
+        public List<FINES_STATUS_DEF> MapFinesStatusDef()
+        {
+            using (DataSetObject dataSetObject = new DataSetObject())
+            {
+                string strModel = "FINES_STATUS_DEF";
+                string strSQL = "select * from " + strMunicipio + ".FINES_STATUS_DEF";
+
+                List<FINES_STATUS_DEF> data = new List<FINES_STATUS_DEF>();
+                DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
+                if (ds.Tables[strModel].Rows.Count > 0)
+                {
+                    var config = configMapModel.configFinesStatusDef();
+
+                    IMapper iMapper = config.CreateMapper();
+
+                    int cont = 0;
+                    foreach (DataRow row in ds.Tables[strModel].Rows)
+                    {
+                        FINES_STATUS_DEF elem = iMapper.Map<DataRow, FINES_STATUS_DEF>(ds.Tables[strModel].Rows[cont]);
+                        data.Add(elem);
+                        cont++;
+                    }
+                }
+                return data;
+            }
+        }
+
+        public List<FINES_STSADMON_DEF> MapFinesStsadmonDef()
+        {
+            using (DataSetObject dataSetObject = new DataSetObject())
+            {
+                string strModel = "FINES_STSADMON_DEF";
+                string strSQL = "select * from " + strMunicipio + ".FINES_STSADMON_DEF";
+
+                List<FINES_STSADMON_DEF> data = new List<FINES_STSADMON_DEF>();
+                DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
+                if (ds.Tables[strModel].Rows.Count > 0)
+                {
+                    var config = configMapModel.configFinesStsadmonDef();
+
+                    IMapper iMapper = config.CreateMapper();
+
+                    int cont = 0;
+                    foreach (DataRow row in ds.Tables[strModel].Rows)
+                    {
+                        FINES_STSADMON_DEF elem = iMapper.Map<DataRow, FINES_STSADMON_DEF>(ds.Tables[strModel].Rows[cont]);
+                        data.Add(elem);
+                        cont++;
+                    }
+                }
+                return data;
+            }
+        }
+
         public List<UNITS> MapUnits()
         {
             using (DataSetObject dataSetObject = new DataSetObject())
@@ -276,7 +488,7 @@ namespace opsControlCenter.Helpers
             using (DataSetObject dataSetObject = new DataSetObject())
             {
                 string strModel = "UnidadesMapa";
-                string strSQL = "select * from " + strMunicipio + ".UNITS u left join " + strMunicipio + ".map_pkmeters mp on mp.pkm_uni_id = u.uni_id where u.uni_dpuni_id=1";
+                string strSQL = "select * from " + strMunicipio + ".UNITS u left join " + strMunicipio + ".map_pkmeters mp on mp.pkm_uni_id = u.uni_id where u.uni_dpuni_id=1 and u.uni_deleted=0 ";
 
                 List<UnidadesMapa> data = new List<UnidadesMapa>();
                 DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);

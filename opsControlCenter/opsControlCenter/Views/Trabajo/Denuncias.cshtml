@@ -1,0 +1,201 @@
+﻿@model List<opsControlCenter.Models.Denuncias>
+@{
+    ViewBag.Title = "Denuncias";
+    ViewBag.url = "~/Trabajo/Denuncias";
+    //para que funcione con ajax es necesario indicar el parametro: ajaxUpdateContainerId
+    //para realizar además alguna acción tras la recarga ajax se usa el parametro: ajaxUpdateCallback
+    var grid = new WebGrid(canPage: true, rowsPerPage: ViewBag.PageSize, ajaxUpdateCallback: "ajaxActualizaGrid", ajaxUpdateContainerId: "grid");
+    grid.Bind(source: Model, rowCount: ViewBag.TotalRows, autoSortAndPage: false);
+}
+
+
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+
+<script src="~/Scripts/estiloGrid.js"></script>
+<script src="~/Scripts/inlineGrid.js"></script>
+<link href="~/Scripts/jquery-ui.min.css" rel="stylesheet" />
+
+<script>
+
+    $(document).ready(function () {
+        ajaxSelectAnio();
+        ajaxActualizaGrid();
+    });
+    function ajaxActualizaGrid() {
+        iconosOrdenGrid();
+        esteticaGrid();
+        pieEnCabeceraGrid();
+        eliminaDivDatapicker();
+        //tras las llamadas ajax se requiere una carga dinamica del script
+        $.getScript("../Scripts/jquery.jeditable.min.js", function () {
+            inlineEditGrid("/Trabajo/DenunciaUpdateParam");
+            ajaxDataSelect("/Trabajo/FinesStsadmonDefJSON/", "/Trabajo/FineUpdateSelectParam/", ".editable-select-finesStsadmonDef", dataTransformFinesStsadmonDef);
+            //ajaxDataSelect("/Trabajo/UnitsJSON/", "/Trabajo/FineUpdateSelectParam/", ".editable-select-units", dataTransformUnits);
+        });
+        $.getScript("../Scripts/jquery-ui.min.js", function () {
+            $.getScript("../Scripts/jquery.jeditable.datepicker.min.js", function () {
+                $.getScript("../Scripts/jquery.jeditable.time.js", function () {
+                
+                //en el caso del datepicker no funciona correctamente al paginar. 
+                //Si lo hace si desactivamos el Ajax del grid (eliminar ajaxUpdateContainerId)
+                //se soluciona eliminando la div deldatepicker cada vez llamando a eliminaDivDatapicker();
+                    //inlineDatepickerGrid("/Trabajo/AlarmUpdateDatepickerParam", ".editable-datepicker");
+                    //inlineTimepickerGrid("/Trabajo/AlarmUpdateTimepickerParam", ".editable-timepicker");
+                });
+            });
+        });
+
+    }
+    function dataTransformFinesStsadmonDef(data, selected) {
+        var res = '';
+        for (var i = 0; i < data.length; i++) {
+            res = res + '"' + data[i].DSAFIN_ID + '___' + data[i].DSAFIN_DESCSHORT + '":"' + data[i].DSAFIN_DESCSHORT + '"' + ',';
+            if (selected == data[i].DSAFIN_DESCSHORT) selected = data[i].DSAFIN_ID + '___' + data[i].DSAFIN_DESCSHORT;
+        }
+        return '{' + res + '"selected": "' + selected + '"}';
+    }
+    //function dataTransformUnits(data, selected) {
+    //    var res = '';
+    //    for (var i = 0; i < data.length; i++) {
+    //        res = res + '"' + data[i].UNI_ID + '___' + data[i].UNI_DESCSHORT + '":"' + data[i].UNI_DESCSHORT + '"' + ',';
+    //        if (selected == data[i].UNI_DESCSHORT) selected = data[i].UNI_ID + '___' + data[i].UNI_DESCSHORT;
+    //    }
+    //    return '{' + res + '"selected": "' + selected + '"}';
+    //}
+    function filtrar() { ajaxFilter('/Trabajo/DenunciasFilter', '/Trabajo/Denuncias', $('#searchBarId form').serialize()); $('#grid').css("opacity", "0.3");}
+    function limpiar() { $('#searchBarId form').find('input:text, input:password, input:file,  textarea').val(''); }
+    function pdf() { this.location.href = "/Trabajo/DenunciasPDF?sort=" + $('#col').val() + "&sortdir=" + $('#dir').val() + "&anio=" + $('select[name=search_ANIO] option').filter(':selected').val()}
+    function excel() { this.location.href = "/Trabajo/DenunciasXLS?sort=" + $('#col').val() + "&sortdir=" + $('#dir').val() + "&anio=" + $('select[name=search_ANIO] option').filter(':selected').val() }
+
+    function ajaxSelectAnio() {
+        $.ajax({
+            type: 'POST',
+            url: "/Trabajo/AniosDenunciasJSON/",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                var s = "";
+                for (var i = 0; i < data.length; i++) {
+                    s += '<option value="' + data[i] + '">' + data[i] + '</option>';
+                }
+                $("#search_ANIO").html(s);  
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        });
+    }
+
+</script>
+
+<div>
+    <h3>@ViewBag.Message</h3>
+    <div id="searchBarId">
+        <form name="searchBarName" method="post">
+            <div>
+                <label for="search_ANIO">Año: </label>
+                <select name="search_ANIO" id="search_ANIO">
+                </select>
+            </div>
+            <div class="form-inline row">
+                <div class="col-sm-11">
+                    @foreach (var elem in typeof(opsControlCenter.Models.Denuncias).GetProperties())
+                    {
+                        var attribute = elem.GetCustomAttributes(typeof(System.ComponentModel.DisplayNameAttribute), true).Cast<System.ComponentModel.DisplayNameAttribute>().SingleOrDefault();
+                        string NombreAtributo = (attribute == null) ? elem.Name : attribute.DisplayName;
+                        if (ViewBag.search != null)
+                        {
+                            <input type="text" name="search_@elem.Name" value="@ViewBag.search["search_" + elem.Name]" class="form-control" placeholder="Buscar @NombreAtributo" />
+                        }
+                        else
+                        {
+                            <input type="text" name="search_@elem.Name" value="" class="form-control" placeholder="Buscar @NombreAtributo" />
+                        }
+                    }
+                </div>
+                <div class="col-sm-1">
+                    <button type="button" value="Search" style="padding:6px;" class="btn btn-primary glyphicon glyphicon-search" onclick="filtrar();"></button>
+                    <button type="button" value="Reset" style="padding:6px;" class="btn btn-primary glyphicon glyphicon-repeat" onclick="limpiar(); filtrar();"></button>
+                    
+                </div>
+            </div>
+        </form>
+    </div>
+    <div id="grid">
+        @{
+
+            @grid.GetHtml(
+            tableStyle: "table table-striped table-responsive table-bordered",
+            footerStyle: "table-pager",
+            firstText: "|<",
+            lastText: ">|",
+            mode: WebGridPagerModes.All,
+            columns: grid.Columns(
+                grid.Column(columnName: "FIN_ID", header: "Id", format:@<text><div>@item.FIN_ID</div></text>),
+                grid.Column(columnName: "DFIN_DESCSHORT", header: "Tipo", format:@<text><div>@item.DFIN_DESCSHORT</div></text>),
+                grid.Column(columnName: "FIN_VEHICLEID", header: "Matrícula", format:@<text><div>@item.FIN_VEHICLEID</div></text>),
+                grid.Column(columnName: "STR_DESC", header: "Calle", format:@<text><div>@item.STR_DESC</div></text>),
+                grid.Column(columnName: "FIN_STRNUMBER", header: "Número", format:@<text><div>@item.FIN_STRNUMBER</div></text>),
+                grid.Column(columnName: "USR_NAME", header: "Usuario", format:@<text><div>@item.USR_NAME</div></text>),
+                grid.Column(columnName: "FIN_DATE", header: "Fecha", format:@<text><div>@item.FIN_DATE</div></text>),
+                grid.Column(columnName: "DSAFIN_DESCSHORT", header: "Estado Adm", style: "selectCol", format:@<text><div id="divFinesStsadmonDef_@item.FIN_ID" onclick="selectFinesStsadmonDef($(this).text());" class="editable-select-finesStsadmonDef" data-id="@item.FIN_ID" data-parametro="FIN_STATUSADMON" data-original="@item.FIN_STATUSADMON">@item.DSAFIN_DESCSHORT</div></text>),
+                grid.Column(columnName: "FIN_COMMENTS", header: "Comentario", style: "textCol", format:@<text><div id="divComentario_@item.FIN_ID" class="editable-text" data-id="@item.FIN_ID" data-parametro="FIN_COMMENTS" data-original="@item.FIN_COMMENTS">@item.FIN_COMMENTS</div></text>),
+                grid.Column(columnName: "UNI_DESCSHORT", header: "PDA", format:@<text><div>@item.UNI_DESCSHORT</div></text>)
+                )
+            )
+
+        }
+        @{ 
+            var sortDirection = "ASC"; if (grid.SortDirection == SortDirection.Descending) { sortDirection = "DESC"; };
+            var sortColumn = "FIN_ID"; if (grid.SortColumn != "undefined" && grid.SortColumn != "") { sortColumn = grid.SortColumn; };
+        }
+        <div class="text-right">
+            <button type="button" value="XLS" style="padding:6px;" class="btn btn-primary" onclick="excel();">XLS</button>
+            <button type="button" value="PDF" style="padding:6px;" class="btn btn-primary" onclick="pdf();">PDF</button>
+            Total reg: <span class="mark">@ViewBag.TotalRows</span>
+        </div>
+        <input type="hidden" id="idSelectedRow" value="1" />
+        @Html.Hidden("dir", sortDirection)
+        @Html.Hidden("col", sortColumn)
+    </div>
+
+    <div id="detalleDenuncias"></div>
+
+    <script>
+        var sel = '{"True":"True","False":"False", "selected":"False"}';
+
+        function detalleSeleccion(id) {
+            $("#idSelectedRow")[0].value = id;
+        }
+        function detalle(id, desc) {
+            $("#idSelectedRow")[0].value = id;
+            $("#detalleDenuncias")[0].innerHTML = id + ": " + desc;// + " oo:" + $('#input_inicio_' + id)[0].value;
+            //$('#input_inicio_' + id)[0].value = desc;
+        }
+        //function deshabilitar() {
+        //    $(".editable-datepicker").each(function (index) {
+        //        $('.editable-datepicker')[index].reset();
+        //    });
+        //    $(".editable-timepicker").each(function (index) {
+        //        $('.editable-timepicker')[index].reset();
+        //    });
+        //}
+
+        function selectFinesStsadmonDef(selected) {
+            if (selected.length < 30) {
+                setTimeout(function seleccion() {
+                    $("select option:contains(" + selected + ")").attr('selected', true);
+                }, 30);
+            }
+        }
+        //function selectUnits(selected) {
+        //    if (selected.length < 30) {
+        //        setTimeout(function seleccion() {
+        //            $("select option:contains(" + selected + ")").attr('selected', true);
+        //        }, 30);
+        //    }
+        //}
+    </script>
+</div>
