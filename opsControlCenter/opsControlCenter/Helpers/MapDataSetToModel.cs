@@ -28,7 +28,7 @@ namespace opsControlCenter.Helpers
 
                 List<Alarmas> data = new List<Alarmas>();              
                 DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-                if (ds.Tables[strModel].Rows.Count > 0)
+                if (ds.Tables[strModel] != null && ds.Tables[strModel].Rows.Count > 0)
                 {
                     var config = configMapModel.configAlarmas();
 
@@ -69,7 +69,7 @@ namespace opsControlCenter.Helpers
 
                 List<Denuncias> data = new List<Denuncias>();
                 DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-                if (ds.Tables[strModel].Rows.Count > 0)
+                if (ds.Tables[strModel] != null && ds.Tables[strModel].Rows.Count > 0)
                 {
                     var config = configMapModel.configDenuncias();
 
@@ -106,7 +106,7 @@ namespace opsControlCenter.Helpers
 
                 List<Denuncias> data = new List<Denuncias>();
                 DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-                if (ds.Tables[strModel].Rows.Count > 0)
+                if (ds.Tables[strModel] != null && ds.Tables[strModel].Rows.Count > 0)
                 {
                     var config = configMapModel.configDenuncias();
 
@@ -133,7 +133,7 @@ namespace opsControlCenter.Helpers
 
                 List<int> data = new List<int>();
                 DataSet ds = dataSetObject.GetDataSet(strSQL);
-                if (ds.Tables[0].Rows.Count > 0)
+                if (ds.Tables[0] != null && ds.Tables[0].Rows.Count > 0)
                 {
                     var config = configMapModel.configDenuncias();
 
@@ -166,7 +166,7 @@ namespace opsControlCenter.Helpers
 
                 List<Recaudacion> data = new List<Recaudacion>();
                 DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-                if (ds.Tables[strModel].Rows.Count > 0)
+                if (ds.Tables[strModel] != null && ds.Tables[strModel].Rows.Count > 0)
                 {
                     var config = configMapModel.configRecaudacion();
 
@@ -195,7 +195,7 @@ namespace opsControlCenter.Helpers
 
                 List<Recaudacion> data = new List<Recaudacion>();
                 DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-                if (ds.Tables[strModel].Rows.Count > 0)
+                if (ds.Tables[strModel] != null && ds.Tables[strModel].Rows.Count > 0)
                 {
                     var config = configMapModel.configRecaudacion();
 
@@ -229,7 +229,7 @@ namespace opsControlCenter.Helpers
 
                 List<AlarmasPorUnidad> data = new List<AlarmasPorUnidad>();
                 DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-                if (ds.Tables[strModel].Rows.Count > 0)
+                if (ds.Tables[strModel] != null && ds.Tables[strModel].Rows.Count > 0)
                 {
                     var config = configMapModel.configAlarmsByUnitId();
 
@@ -257,7 +257,7 @@ namespace opsControlCenter.Helpers
 
                 List<OperacionesPorUnidad> data = new List<OperacionesPorUnidad>();
                 DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-                if (ds.Tables[strModel].Rows.Count > 0)
+                if (ds.Tables[strModel] != null && ds.Tables[strModel].Rows.Count > 0)
                 {
                     var config = configMapModel.configOperationsByUnitId();
 
@@ -288,7 +288,7 @@ namespace opsControlCenter.Helpers
 
                 List<ALARMS_DEF> data = new List<ALARMS_DEF>();
                 DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-                if (ds.Tables[strModel].Rows.Count > 0)
+                if (ds.Tables[strModel] != null && ds.Tables[strModel].Rows.Count > 0)
                 {
                     var config = configMapModel.configAlarmsDef();
 
@@ -315,7 +315,7 @@ namespace opsControlCenter.Helpers
 
                 ALARMS_DEF data = new ALARMS_DEF();
                 DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-                if (ds.Tables[strModel].Rows.Count > 0)
+                if (ds.Tables[strModel] != null && ds.Tables[strModel].Rows.Count > 0)
                 {
                     var config = configMapModel.configAlarmsDef();
 
@@ -336,7 +336,7 @@ namespace opsControlCenter.Helpers
 
                 COLLECTINGS data = new COLLECTINGS();
                 DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-                if (ds.Tables[strModel].Rows.Count > 0)
+                if (ds.Tables[strModel] != null && ds.Tables[strModel].Rows.Count > 0)
                 {
                     var config = configMapModel.configCollectings();
 
@@ -357,7 +357,7 @@ namespace opsControlCenter.Helpers
 
                 List<STREETS> data = new List<STREETS>();
                 DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-                if (ds.Tables[strModel].Rows.Count > 0)
+                if (ds.Tables[strModel] != null && ds.Tables[strModel].Rows.Count > 0)
                 {
                     var config = configMapModel.configStreets();
 
@@ -384,7 +384,7 @@ namespace opsControlCenter.Helpers
 
                 List<FINES_DEF> data = new List<FINES_DEF>();
                 DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-                if (ds.Tables[strModel].Rows.Count > 0)
+                if (ds.Tables[strModel] != null && ds.Tables[strModel].Rows.Count > 0)
                 {
                     var config = configMapModel.configFinesDef();
 
@@ -411,7 +411,7 @@ namespace opsControlCenter.Helpers
 
                 List<FINES_STATUS_DEF> data = new List<FINES_STATUS_DEF>();
                 DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-                if (ds.Tables[strModel].Rows.Count > 0)
+                if (ds.Tables[strModel] != null && ds.Tables[strModel].Rows.Count > 0)
                 {
                     var config = configMapModel.configFinesStatusDef();
 
@@ -438,7 +438,7 @@ namespace opsControlCenter.Helpers
 
                 List<FINES_STSADMON_DEF> data = new List<FINES_STSADMON_DEF>();
                 DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-                if (ds.Tables[strModel].Rows.Count > 0)
+                if (ds.Tables[strModel] != null && ds.Tables[strModel].Rows.Count > 0)
                 {
                     var config = configMapModel.configFinesStsadmonDef();
 
@@ -465,7 +465,7 @@ namespace opsControlCenter.Helpers
 
                 List<UNITS> data = new List<UNITS>();
                 DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-                if (ds.Tables[strModel].Rows.Count > 0)
+                if (ds.Tables[strModel] != null && ds.Tables[strModel].Rows.Count > 0)
                 {
                     var config = configMapModel.configUnits();
 
@@ -492,7 +492,7 @@ namespace opsControlCenter.Helpers
 
                 List<UnidadesMapa> data = new List<UnidadesMapa>();
                 DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-                if (ds.Tables[strModel].Rows.Count > 0)
+                if (ds.Tables[strModel] != null && ds.Tables[strModel].Rows.Count > 0)
                 {
                     var config = configMapModel.configUnidadesMapa();
 
@@ -529,7 +529,7 @@ namespace opsControlCenter.Helpers
 
                 List<UnidadesInstalacion> data = new List<UnidadesInstalacion>();
                 DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-                if (ds.Tables[strModel].Rows.Count > 0)
+                if (ds.Tables[strModel] != null && ds.Tables[strModel].Rows.Count > 0)
                 {
                     var config = configMapModel.configUnidadesInstalacion();
 
@@ -560,7 +560,7 @@ namespace opsControlCenter.Helpers
 
                 Usuario data = new Usuario();
                 DataSet ds = dataSetObject.GetDataSet(strSQL, strModel);
-                if (ds.Tables[strModel].Rows.Count > 0)
+                if (ds.Tables[strModel] != null && ds.Tables[strModel].Rows.Count > 0)
                 {
                     var config = configMapModel.configUsuario();
 

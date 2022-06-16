@@ -81,7 +81,7 @@
         for (var i = 0; i < rowCount; i++) {
             image.url = '../../Content/Images/pkmeter_' + $('#UNITS tbody tr')[i].children[5].innerHTML + '.png';
             const marcador = new google.maps.Marker({
-                position: ($('#UNITS tbody tr')[i].children[7].innerHTML != "") ? new google.maps.LatLng(parseFloat($('#UNITS tbody tr')[i].children[7].innerHTML.replace(',', '.')), parseFloat($('#UNITS tbody tr')[i].children[8].innerHTML.replace(',', '.'))) : new google.maps.LatLng(parseFloat($('#lon').val()) + 0.002 - (0.00001 * $('#UNITS tbody tr')[i].children[3].innerHTML), parseFloat($('#lat').val()) - 0.005 + (0.00001 * $('#UNITS tbody tr')[i].children[4].innerHTML)),
+                position: ($('#UNITS tbody tr')[i].children[7].innerHTML != "0") ? new google.maps.LatLng(parseFloat($('#UNITS tbody tr')[i].children[7].innerHTML.replace(',', '.')), parseFloat($('#UNITS tbody tr')[i].children[8].innerHTML.replace(',', '.'))) : new google.maps.LatLng(parseFloat($('#lat').val()) + 0.002 - (0.00001 * $('#UNITS tbody tr')[i].children[3].innerHTML), parseFloat($('#lon').val()) - 0.005 + (0.00001 * $('#UNITS tbody tr')[i].children[4].innerHTML)),
                 map: map,
                 label: $('#UNITS tbody tr')[i].children[0].innerHTML,
                 title: $('#UNITS tbody tr')[i].children[0].innerHTML + " - " + $('#UNITS tbody tr')[i].children[2].innerHTML,
